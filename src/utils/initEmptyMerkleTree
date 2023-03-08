@@ -1,0 +1,63 @@
+import * as beet from "@metaplex-foundation/beet";
+import * as web3 from "@solana/web3.js";
+import { programID } from "./web3utils";
+
+const initEmptyMerkleTreeStruct = new beet.BeetArgsStruct<{
+  instructionDiscriminator: number;
+}>(
+  [["instructionDiscriminator", beet.u8]],
+  "InitEmptyMerkleTreeInstructionArgs"
+);
+
+type InitEmptyMerkleTreeInstructionAccounts = {
+  merkleTree: web3.PublicKey;
+  //authority: web3.PublicKey;
+  anchorRemainingAccounts?: web3.AccountMeta[];
+};
+
+export const initEmptyMerkleTreeInstructionDiscriminator = 4;
+
+function createInitEmptyMerkleTreeInstruction(
+  accounts: InitEmptyMerkleTreeInstructionAccounts,
+  //args: InitEmptyMerkleTreeInstructionArgs,
+  programId = programID
+) {
+  const [data] = initEmptyMerkleTreeStruct.serialize({
+    instructionDiscriminator: initEmptyMerkleTreeInstructionDiscriminator,
+  });
+  const keys: web3.AccountMeta[] = [
+    {
+      pubkey: accounts.merkleTree,
+      isWritable: true,
+      isSigner: false,
+    },
+    /*     {
+      pubkey: accounts.authority,
+      isWritable: false,
+      isSigner: true,
+    }, */
+  ];
+
+  if (accounts.anchorRemainingAccounts != null) {
+    for (const acc of accounts.anchorRemainingAccounts) {
+      keys.push(acc);
+    }
+  }
+
+  const ix = new web3.TransactionInstruction({
+    programId,
+    keys,
+    data,
+  });
+  return ix;
+}
+
+export function createInitEmptyMerkleTreeIx(
+  merkleTree: web3.PublicKey
+  //authority: web3.PublicKey
+): web3.TransactionInstruction {
+  return createInitEmptyMerkleTreeInstruction({
+    merkleTree: merkleTree,
+    //authority: authority,
+  });
+}
