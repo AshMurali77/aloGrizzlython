@@ -11,11 +11,12 @@ const initEmptyMerkleTreeStruct = new beet.BeetArgsStruct<{
 
 type InitEmptyMerkleTreeInstructionAccounts = {
   merkleTree: web3.PublicKey;
-  //authority: web3.PublicKey;
-  anchorRemainingAccounts?: web3.AccountMeta[];
+  feePayer: web3.PublicKey;
+  systemProgram: web3.PublicKey;
+  rentSysvar: web3.PublicKey;
 };
 
-export const initEmptyMerkleTreeInstructionDiscriminator = 4;
+const initEmptyMerkleTreeInstructionDiscriminator = 0;
 
 function createInitEmptyMerkleTreeInstruction(
   accounts: InitEmptyMerkleTreeInstructionAccounts,
@@ -27,22 +28,26 @@ function createInitEmptyMerkleTreeInstruction(
   });
   const keys: web3.AccountMeta[] = [
     {
+      pubkey: accounts.feePayer,
+      isWritable: false,
+      isSigner: true,
+    },
+    {
       pubkey: accounts.merkleTree,
       isWritable: true,
       isSigner: false,
     },
-    /*     {
-      pubkey: accounts.authority,
+    {
+      pubkey: accounts.systemProgram,
       isWritable: false,
-      isSigner: true,
-    }, */
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.rentSysvar,
+      isWritable: false,
+      isSigner: false,
+    },
   ];
-
-  if (accounts.anchorRemainingAccounts != null) {
-    for (const acc of accounts.anchorRemainingAccounts) {
-      keys.push(acc);
-    }
-  }
 
   const ix = new web3.TransactionInstruction({
     programId,
@@ -52,12 +57,17 @@ function createInitEmptyMerkleTreeInstruction(
   return ix;
 }
 
-export function createInitEmptyMerkleTreeIx(
-  merkleTree: web3.PublicKey
-  //authority: web3.PublicKey
+export default function createInitEmptyMerkleTreeIx(
+  feePayer: web3.PublicKey,
+  merkleTree: web3.PublicKey,
+  systemProgram: web3.PublicKey,
+  rentSysvar: web3.PublicKey
 ): web3.TransactionInstruction {
   return createInitEmptyMerkleTreeInstruction({
-    merkleTree: merkleTree,
+    merkleTree,
+    feePayer,
+    systemProgram,
+    rentSysvar,
     //authority: authority,
   });
 }
