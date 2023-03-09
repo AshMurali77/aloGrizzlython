@@ -62,8 +62,14 @@ impl Pack for DocTree {
             ProgramError::InvalidInstructionData
         })
     }
-
 }
+
+#[derive(Clone, Debug, BorshSerialize, BorshDeserialize, BorshSchema, PartialEq)]
+pub struct MerkleHeader {
+    pub authority : [u8; 32],
+    
+}
+
 /* impl Sealed for TreeState {}
 
 impl Pack for TreeState {

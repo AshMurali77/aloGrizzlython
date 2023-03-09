@@ -35,11 +35,11 @@ const rentSysvar = new web3.PublicKey(
 let rent = 0;
 async function airdrop() {
   console.log("aidropping now");
+  rent = await connection.getMinimumBalanceForRentExemption(828224);
   const airdrop = await connection.requestAirdrop(
     localPubkey.publicKey,
-    1000 * web3.LAMPORTS_PER_SOL
+    rent + 1 * web3.LAMPORTS_PER_SOL
   );
-  rent = await connection.getMinimumBalanceForRentExemption(828224);
   console.log(airdrop);
 }
 export default function Sidebar() {
@@ -69,7 +69,7 @@ export default function Sidebar() {
         newAccountPubkey: merklePubkey.publicKey,
         lamports: rent,
         space: 828224,
-        programId: systemProgram,
+        programId: programID,
       })
     );
 
