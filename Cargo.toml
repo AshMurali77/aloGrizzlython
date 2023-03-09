@@ -13,7 +13,7 @@ crate-type = ["cdylib", "rlib"]
 no-entrypoint = []
 
 [dependencies]
-borsh = "0.10.1"
+borsh = "=0.9.3"
 bytemuck = "1.13.1"
 solana-program = "1.15.1"
 spl-concurrent-merkle-tree = "0.1.2"

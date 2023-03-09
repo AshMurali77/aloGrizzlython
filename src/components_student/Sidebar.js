@@ -17,6 +17,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import SearchIcon from "@mui/icons-material/Search";
 import { getPayer, programID } from "../utils/web3utils";
 import createInitEmptyMerkleTreeInstruction from "../utils/initEmptyMerkleTree.js";
+import createAppendInstruction from "../utils/append";
 import * as web3 from "@solana/web3.js";
 const drawerWidth = 256;
 
@@ -26,8 +27,8 @@ const connection = new web3.Connection(
   "http://127.0.0.1:8899",
   "confirmed"
 );
-const merklePubkey = web3.Keypair.generate();
-const localPubkey = web3.Keypair.generate();
+const merkleKeypair = web3.Keypair.generate();
+const localKeypair = web3.Keypair.generate();
 const systemProgram = new web3.PublicKey("11111111111111111111111111111111");
 const rentSysvar = new web3.PublicKey(
   "SysvarRent111111111111111111111111111111111"
@@ -37,21 +38,21 @@ async function airdrop() {
   console.log("aidropping now");
   rent = await connection.getMinimumBalanceForRentExemption(828224);
   const airdrop = await connection.requestAirdrop(
-    localPubkey.publicKey,
+    localKeypair.publicKey,
     rent + 1 * web3.LAMPORTS_PER_SOL
   );
   console.log(airdrop);
 }
 export default function Sidebar() {
-  const handleClick = async () => {
-    //const localPubkey = await getPayer();
+  const handleInitClick = async () => {
+    //const localKeypair = await getPayer();
     await connection
-      .getBalance(localPubkey.publicKey)
+      .getBalance(localKeypair.publicKey)
       .then((balance) =>
         console.log(
           "signature",
           "::",
-          localPubkey.publicKey.toBase58(),
+          localKeypair.publicKey.toBase58(),
           "balance: ",
           balance
         )
@@ -60,30 +61,35 @@ export default function Sidebar() {
       "connection",
       connection,
       "wallet",
-      localPubkey.publicKey.toBase58()
+      localKeypair.publicKey.toBase58(),
+      "merkle",
+      merkleKeypair.publicKey.toBase58()
     );
 
     let createAccountTransaction = new web3.Transaction().add(
       web3.SystemProgram.createAccount({
-        fromPubkey: localPubkey.publicKey,
-        newAccountPubkey: merklePubkey.publicKey,
+        fromPubkey: localKeypair.publicKey,
+        newAccountPubkey: merkleKeypair.publicKey,
         lamports: rent,
         space: 828224,
         programId: programID,
       })
     );
 
-    await web3.sendAndConfirmTransaction(connection, createAccountTransaction, [localPubkey, merklePubkey]);
+    await web3.sendAndConfirmTransaction(connection, createAccountTransaction, [
+      localKeypair,
+      merkleKeypair,
+    ]);
 
     let instruction = new web3.TransactionInstruction({
       keys: [
         {
-          pubkey: localPubkey.publicKey,
+          pubkey: localKeypair.publicKey,
           isWritable: false,
           isSigner: true,
         },
         {
-          pubkey: merklePubkey.publicKey,
+          pubkey: merkleKeypair.publicKey,
           isWritable: true,
           isSigner: true,
         },
@@ -107,18 +113,42 @@ export default function Sidebar() {
       value: { blockhash, lastValidBlockHeight },
     } = await connection.getLatestBlockhashAndContext();
     const message = new web3.TransactionMessage({
-      payerKey: localPubkey.publicKey,
+      payerKey: localKeypair.publicKey,
       recentBlockhash: blockhash,
       instructions,
     }).compileToV0Message();
     const transaction = new web3.VersionedTransaction(message);
-    transaction.sign([localPubkey, merklePubkey]);
+    transaction.sign([localKeypair, merkleKeypair]);
     //const signature = await connection.sendTransaction(transaction);
     await connection
       .simulateTransaction(transaction)
-      .then((res) => console.log("success :)", res.value.logs));
+      .then((res) => console.log("success :)", res));
   };
 
+  const handleAppendClick = async () => {
+    let instruction = createAppendInstruction(
+      localKeypair.publicKey,
+      merkleKeypair.publicKey
+    );
+    const instructions = [instruction];
+    const {
+      context: { slot: minContextSlot },
+      value: { blockhash, lastValidBlockHeight },
+    } = await connection.getLatestBlockhashAndContext();
+    const message = new web3.TransactionMessage({
+      payerKey: localKeypair.publicKey,
+      recentBlockhash: blockhash,
+      instructions,
+    }).compileToV0Message();
+    const transaction = new web3.VersionedTransaction(message);
+    transaction.sign([localKeypair, merkleKeypair]);
+    //const signature = await connection.sendTransaction(transaction);
+    await connection
+      .simulateTransaction(transaction)
+      .then((res) => console.log("success :)", res));
+  };
+
+  const handleReplaceClick = async () => {};
   return (
     <Drawer
       sx={{
@@ -148,7 +178,7 @@ export default function Sidebar() {
               <ListItemIcon>
                 <SchoolIcon />
               </ListItemIcon>
-              <ListItemText primary="Academics" onClick={handleClick} />
+              <ListItemText primary="InitTree" onClick={handleInitClick} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
@@ -156,7 +186,23 @@ export default function Sidebar() {
               <ListItemIcon>
                 <SearchIcon />
               </ListItemIcon>
-              <ListItemText primary="College Search" />
+              <ListItemText primary="Airdrop" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleAppendClick}>
+              <ListItemIcon>
+                <SearchIcon />
+              </ListItemIcon>
+              <ListItemText primary="Append" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleReplaceClick}>
+              <ListItemIcon>
+                <SearchIcon />
+              </ListItemIcon>
+              <ListItemText primary="Replace" />
             </ListItemButton>
           </ListItem>
         </List>
