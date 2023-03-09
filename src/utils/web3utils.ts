@@ -5,7 +5,7 @@ import path from "path";
 import yaml from "yaml";
 
 //web3 program ID
-const programAddress = "EWqDSAKQHh68KU3j1xt2GdpA98nY8C3MZtnCkot4xcSx";
+const programAddress = "CjRyYe35c7U8VBUgYoUQtwEvbgmqoi9ybzAbCurb13HH";
 export const programID = new web3.PublicKey(programAddress);
 
 /**
