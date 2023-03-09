@@ -4,10 +4,15 @@ import os from "os";
 import path from "path";
 import yaml from "yaml";
 
-//web3 program ID
+//web3 program ID, solana progr
 const programAddress = "CjRyYe35c7U8VBUgYoUQtwEvbgmqoi9ybzAbCurb13HH";
 export const programID = new web3.PublicKey(programAddress);
-
+export const systemProgram = new web3.PublicKey(
+  "11111111111111111111111111111111"
+);
+export const rentSysvar = new web3.PublicKey(
+  "SysvarRent111111111111111111111111111111111"
+);
 /**
  * Helper function that adds proof nodes to a TransactionInstruction
  * by adding extra keys to the transaction
