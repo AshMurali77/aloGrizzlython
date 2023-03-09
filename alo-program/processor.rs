@@ -84,7 +84,17 @@ pub fn process_instruction (
 
             
         },
-        ProgramInstruction::ModifyLeaf { tree_address, node_index, new_node } => {
+        ProgramInstruction::ModifyLeaf { tree_address, previous_leaf, new_leaf, node_index } => {
+            msg!("Program Instruction: AddLeaf");
+            let _funder_info = next_account_info(account_info_iter)?;
+            let merkle_info = next_account_info(account_info_iter)?;
+
+            let mut merkle_bytes = merkle_info.try_borrow_mut_data().unwrap();
+            let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<24,1024>>(&mut merkle_bytes).unwrap();
+
+            //merkle.set_leaf(tree_address, previous_leaf, new_leaf, proof, node_index);
+
+
 
         },
         ProgramInstruction::AuthorizeView { tree_address, node_index } => todo!(),

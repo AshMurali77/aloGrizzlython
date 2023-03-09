@@ -21,9 +21,11 @@ pub enum ProgramInstruction {
         #[allow(dead_code)]
         tree_address : [u8; 32],
         #[allow(dead_code)]
-        node_index : u16,
+        previous_leaf : Node,
         #[allow(dead_code)]
-        new_node : Node
+        new_leaf : Node,
+        #[allow(dead_code)]
+        node_index : u32,
     },
     AuthorizeView {
         #[allow(dead_code)]
