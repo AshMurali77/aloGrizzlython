@@ -41,7 +41,7 @@ pub fn process_instruction (
             let rent_sysvar_info = next_account_info(account_info_iter)?;
             let rent = &Rent::from_account_info(rent_sysvar_info)?;
 
-            invoke(
+            /* invoke(
                 &system_instruction::create_account(
                     funder_info.key, 
                     merkle_info.key, 
@@ -53,7 +53,7 @@ pub fn process_instruction (
                     merkle_info.clone(),
                     system_program_info.clone(),
                 ])?;
-
+ */
             let mut merkle_bytes = merkle_info.try_borrow_mut_data().unwrap();
             let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<24,1024>>(&mut merkle_bytes).unwrap();
             let _root = merkle.initialize().unwrap_or_else(|error| {
