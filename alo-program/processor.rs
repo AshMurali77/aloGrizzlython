@@ -6,14 +6,13 @@ use solana_program::{
     entrypoint::ProgramResult,
     msg, 
     keccak::hashv,
-    program::invoke,
+    /* program::invoke,
     system_instruction,
     sysvar::Sysvar,
-    rent::Rent,
+    rent::Rent, */
     //program::invoke_signed,
 };
 
-use std::mem::size_of;
 
 use spl_concurrent_merkle_tree::{
     concurrent_merkle_tree::ConcurrentMerkleTree,
@@ -35,11 +34,12 @@ pub fn process_instruction (
 
     match instruction {
         ProgramInstruction::CreateTree => {
-            let funder_info = next_account_info(account_info_iter)?;
+            msg!("Program Instruction: CreateTree");
+            let _funder_info = next_account_info(account_info_iter)?;
             let merkle_info = next_account_info(account_info_iter)?;
-            let system_program_info = next_account_info(account_info_iter)?;
-            let rent_sysvar_info = next_account_info(account_info_iter)?;
-            let rent = &Rent::from_account_info(rent_sysvar_info)?;
+            //let system_program_info = next_account_info(account_info_iter)?;
+            //let rent_sysvar_info = next_account_info(account_info_iter)?;
+            //let rent = &Rent::from_account_info(rent_sysvar_info)?;
 
             /* invoke(
                 &system_instruction::create_account(
@@ -56,10 +56,12 @@ pub fn process_instruction (
  */
             let mut merkle_bytes = merkle_info.try_borrow_mut_data().unwrap();
             let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<24,1024>>(&mut merkle_bytes).unwrap();
-            let _root = merkle.initialize().unwrap_or_else(|error| {
-                //temp result handling
-                return hashv(&[&[1,2,3], &[error as u8]]).to_bytes();
-            });
+            let _root = merkle.initialize().unwrap();
+
+            msg!("{:?}", merkle.get_root());
+
+            let (logged_bytes, _) = merkle_bytes.split_at(64);
+            msg!("New Tree Data: {:?}", logged_bytes);
 
             //merkle.append(hashv(&[&[1,2,3]]).to_bytes()).unwrap(); 
 
@@ -67,6 +69,7 @@ pub fn process_instruction (
 
         },
         ProgramInstruction::AddLeaf {tree_address } => {
+            msg!("Program Instruction: AddLeaf");
             let _funder_info = next_account_info(account_info_iter)?;
             let merkle_info = next_account_info(account_info_iter)?;
             //let system_program_info = next_account_info(account_info_iter)?;
@@ -75,9 +78,11 @@ pub fn process_instruction (
             let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<24,1024>>(&mut merkle_bytes).unwrap();
 
             merkle.append(tree_address).unwrap();
+            msg!("Changelog: {:?}", merkle.get_change_log());
+            msg!("Rightmost Proof: {:?}", merkle.rightmost_proof);
             //msg!("Data After Append: {:?}", merkle_bytes[]);
 
-
+            
         },
         ProgramInstruction::ModifyLeaf { tree_address, node_index, new_node } => {
 

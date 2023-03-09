@@ -33,11 +33,11 @@ const localKeypair = web3.Keypair.generate();
 let rent = 0;
 async function airdrop() {
   console.log("aidropping now");
+  rent = await connection.getMinimumBalanceForRentExemption(828224);
   const airdrop = await connection.requestAirdrop(
     localKeypair.publicKey,
-    1000 * web3.LAMPORTS_PER_SOL
+    rent + 1 * web3.LAMPORTS_PER_SOL
   );
-  rent = await connection.getMinimumBalanceForRentExemption(828224);
   console.log(airdrop);
 }
 export default function Sidebar() {
