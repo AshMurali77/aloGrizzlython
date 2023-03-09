@@ -1,0 +1,19 @@
+[package]
+name = "alo-program"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+path = "alo-program/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+no-entrypoint = []
+
+[dependencies]
+borsh = "0.10.1"
+bytemuck = "1.13.1"
+solana-program = "1.15.1"
+spl-concurrent-merkle-tree = "0.1.2"
