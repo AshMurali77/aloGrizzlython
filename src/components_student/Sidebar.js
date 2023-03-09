@@ -15,7 +15,7 @@ import {
 import ArticleIcon from "@mui/icons-material/Article";
 import SchoolIcon from "@mui/icons-material/School";
 import SearchIcon from "@mui/icons-material/Search";
-import { getPayer, programID } from "../utils/web3utils";
+import { systemProgram, rentSysvar, programID } from "../utils/web3utils";
 import createInitEmptyMerkleTreeInstruction from "../utils/initEmptyMerkleTree.js";
 import createAppendInstruction from "../utils/append";
 import * as web3 from "@solana/web3.js";
@@ -29,10 +29,7 @@ const connection = new web3.Connection(
 );
 const merkleKeypair = web3.Keypair.generate();
 const localKeypair = web3.Keypair.generate();
-const systemProgram = new web3.PublicKey("11111111111111111111111111111111");
-const rentSysvar = new web3.PublicKey(
-  "SysvarRent111111111111111111111111111111111"
-);
+
 let rent = 0;
 async function airdrop() {
   console.log("aidropping now");
@@ -81,32 +78,12 @@ export default function Sidebar() {
       merkleKeypair,
     ]);
 
-    let instruction = new web3.TransactionInstruction({
-      keys: [
-        {
-          pubkey: localKeypair.publicKey,
-          isWritable: false,
-          isSigner: true,
-        },
-        {
-          pubkey: merkleKeypair.publicKey,
-          isWritable: true,
-          isSigner: true,
-        },
-        {
-          pubkey: systemProgram,
-          isWritable: false,
-          isSigner: false,
-        },
-        {
-          pubkey: rentSysvar,
-          isWritable: false,
-          isSigner: false,
-        },
-      ],
-      programId: programID,
-      data: createInitEmptyMerkleTreeInstruction(),
-    });
+    let instruction = createInitEmptyMerkleTreeInstruction(
+      localKeypair.publicKey,
+      merkleKeypair.publicKey,
+      systemProgram,
+      rentSysvar
+    );
     const instructions = [instruction];
     const {
       context: { slot: minContextSlot },
