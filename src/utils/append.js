@@ -20,21 +20,43 @@ const layout = BufferLayout.struct([
   BufferLayout.seq(BufferLayout.u8(), 32, "leaf"),
 ]);
 //const appendInstructionDiscriminator = 1;
-
 export default function createAppendInstruction(
   localPubkey,
   merklePubkey,
   programId = programID
 ) {
+  console.log(
+    "buffer",
+    Buffer.from(
+      keccak_256.digest(
+        Buffer.concat([
+          Buffer.from(localPubkey.toBase58()),
+          Buffer.from(merklePubkey.toBase58()),
+          Buffer.from(programID.toBase58()),
+        ])
+      )
+    )
+  );
   const data = Buffer.alloc(layout.span);
   layout.encode(
-    { instruction: 1, leaf: keccak_256(localPubkey, merklePubkey, programID) },
+    {
+      instruction: 1,
+      leaf: Buffer.from(
+        keccak_256.digest(
+          Buffer.concat([
+            Buffer.from(localPubkey.toBase58()),
+            Buffer.from(merklePubkey.toBase58()),
+            Buffer.from(programID.toBase58()),
+          ])
+        )
+      ),
+    },
     data
   );
 
   const keys = [
     { pubkey: localPubkey, isWritable: false, isSigner: true },
-    { pubkey: merklePubkey, isWritable: true, isSigner: false },
+    { pubkey: merklePubkey, isWritable: true, isSigner: true },
   ];
 
   const instruction = new web3.TransactionInstruction({
