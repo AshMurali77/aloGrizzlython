@@ -77,9 +77,13 @@ pub fn process_instruction (
             let mut merkle_bytes = merkle_info.try_borrow_mut_data().unwrap();
             let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<24,1024>>(&mut merkle_bytes).unwrap();
 
-            merkle.append(tree_address).unwrap();
-            msg!("Changelog: {:?}", merkle.get_change_log());
-            msg!("Rightmost Proof: {:?}", merkle.rightmost_proof);
+            msg!("{:?}", merkle.get_root());
+
+            if merkle.is_initialized() {
+                merkle.append(tree_address).unwrap();
+                msg!("Changelog: {:?}", merkle.get_change_log());
+                msg!("Rightmost Proof: {:?}", merkle.rightmost_proof);
+            }
             //msg!("Data After Append: {:?}", merkle_bytes[]);
 
             
