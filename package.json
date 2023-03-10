@@ -10,6 +10,7 @@
     "@mui/icons-material": "^5.10.16",
     "@mui/material": "^5.11.10",
     "@mui/x-data-grid": "^5.17.24",
+    "@solana/spl-account-compression": "^0.1.6",
     "@solana/web3.js": "^1.73.3",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",

@@ -3,8 +3,10 @@ import os from "os";
 //import fs from "mz/fs";
 import path from "path";
 import yaml from "yaml";
-
-//web3 program ID, solana progr
+import { keccak_256 } from "js-sha3";
+import { Buffer } from "buffer";
+import * as account from "@solana/spl-account-compression";
+//web3 program ID, solana program
 const programAddress = "CjRyYe35c7U8VBUgYoUQtwEvbgmqoi9ybzAbCurb13HH";
 export const programID = new web3.PublicKey(programAddress);
 export const systemProgram = new web3.PublicKey(
@@ -82,3 +84,14 @@ export async function establishConnection(): Promise<void> {
   const version = await connection.getVersion();
   console.log("Connection to cluster established:", rpcUrl, version);
 }
+
+/* //hash function
+export function hashv(...pubkeys: web3.PublicKey): Buffer {
+  const keys = pubkeys.map((pubkey) => {
+    Buffer.from(pubkey.toBase58());
+  });
+  return Buffer.from(keccak_256.digest(Buffer.concat([keys[0]])));
+}
+ */
+
+const mt = account.MerkleTree;

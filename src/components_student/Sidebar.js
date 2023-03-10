@@ -18,6 +18,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { systemProgram, rentSysvar, programID } from "../utils/web3utils";
 import createInitEmptyMerkleTreeInstruction from "../utils/initEmptyMerkleTree.js";
 import createAppendInstruction from "../utils/append";
+import createReplaceInstruction from "../utils/replace";
 import * as web3 from "@solana/web3.js";
 const drawerWidth = 256;
 
@@ -125,7 +126,28 @@ export default function Sidebar() {
       .then((res) => console.log("success :)", res.value.logs));
   };
 
-  const handleReplaceClick = async () => {};
+  const handleReplaceClick = async () => {
+    let instruction = createReplaceInstruction(
+      localKeypair.publicKey,
+      merkleKeypair.publicKey
+    );
+    const instructions = [instruction];
+    const {
+      context: { slot: minContextSlot },
+      value: { blockhash, lastValidBlockHeight },
+    } = await connection.getLatestBlockhashAndContext();
+    const message = new web3.TransactionMessage({
+      payerKey: localKeypair.publicKey,
+      recentBlockhash: blockhash,
+      instructions,
+    }).compileToV0Message();
+    const transaction = new web3.VersionedTransaction(message);
+    transaction.sign([localKeypair, merkleKeypair]);
+    //const signature = await connection.sendTransaction(transaction);
+    await connection
+      .simulateTransaction(transaction)
+      .then((res) => console.log("success :)", res));
+  };
   return (
     <Drawer
       sx={{

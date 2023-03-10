@@ -4,6 +4,7 @@ import {
   uploadBytesResumable,
   listAll,
   getMetadata,
+  updateMetadata,
 } from "firebase/storage";
 import { collection, getDocs } from "firebase/firestore";
 import { storage, db } from "../firebase";
@@ -35,6 +36,7 @@ export const getFileData = async (origin) => {
   await Promise.all(
     files.items.map(async (item) => {
       const metadata = await getMetadata(item);
+      metadata.customMetadata = { testing: "leaf" };
       const download = await getDownloadURL(item);
       console.log(download);
       file_data.push(metadata);
@@ -44,6 +46,9 @@ export const getFileData = async (origin) => {
   console.log(file_data);
   return [file_data, download_data];
 };
+
+//Update custom metadata
+export const updateFileData = async () => {};
 
 //Fetch students from cloud db
 export const getStudentData = async () => {
