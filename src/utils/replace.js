@@ -1,19 +1,18 @@
 import * as web3 from "@solana/web3.js";
-import { programID } from "./web3utils";
+import { programID, addProof } from "./web3utils";
 import { Buffer } from "buffer";
 import * as BufferLayout from "@solana/buffer-layout";
 import { keccak_256 } from "js-sha3";
 
 const layout = BufferLayout.struct([
   BufferLayout.u8("instruction"),
-  BufferLayout.seq(BufferLayout.u8(), 32, "leaf"),
+  BufferLayout.seq(BufferLayout.u8(), 32, "root"),
+  BufferLayout.seq(BufferLayout.u8(), 32, "previousLeaf"),
+  BufferLayout.seq(BufferLayout.u8(), 32, "newLeaf"),
+  BufferLayout.u32("index"),
 ]);
 //const appendInstructionDiscriminator = 1;
-export default function createAppendInstruction(
-  localPubkey,
-  merklePubkey,
-  programId = programID
-) {
+function createReplaceIx(localPubkey, merklePubkey, programId = programID) {
   console.log(
     "buffer",
     Buffer.from(
@@ -29,8 +28,8 @@ export default function createAppendInstruction(
   const data = Buffer.alloc(layout.span);
   layout.encode(
     {
-      instruction: 1,
-      leaf: Buffer.from(
+      instruction: 2,
+      root: Buffer.from(
         keccak_256.digest(
           Buffer.concat([
             Buffer.from(localPubkey.toBase58()),
@@ -56,18 +55,41 @@ export default function createAppendInstruction(
   return instruction;
 }
 
-/* export function CreateAppendIx(
-  merkleTree: web3.PublicKey,
-  authority: web3.PublicKey,
-  newLeaf: Buffer | ArrayLike<number>
-): web3.TransactionInstruction {
-  return createAppendInstruction(
-    {
-      merkleTree,
-      authority: authority,
-    },
-    {
-      leaf: Array.from(newLeaf),
-    }
+export default function createReplaceInstruction(
+  merkleTree,
+  localPubkey,
+  newLeaf,
+  proof
+) {
+  return addProof(
+    createReplaceIx(
+      {
+        merkleTree,
+        localPubkey,
+      },
+      {
+        root: Array.from(proof.root),
+        previousLeaf: Array.from(proof.leaf),
+        newLeaf: Array.from(newLeaf),
+        index: proof.leafIndex,
+      }
+    ),
+    proof.proof
   );
+}
+
+/* export function addProof(
+  instruction: web3.TransactionInstruction,
+  nodeProof: Buffer[]
+): web3.TransactionInstruction {
+  instruction.keys = instruction.keys.concat(
+    nodeProof.map((node) => {
+      return {
+        pubkey: new web3.PublicKey(node),
+        isSigner: false,
+        isWritable: false,
+      };
+    })
+  );
+  return instruction;
 } */
