@@ -3,6 +3,7 @@ import {
   getDownloadURL,
   uploadBytesResumable,
   listAll,
+  list,
   getMetadata,
   updateMetadata,
 } from "firebase/storage";
@@ -39,14 +40,12 @@ export const getFileData = async (origin) => {
       const metadata = await getMetadata(item);
       const download = await getDownloadURL(item);
       metadata.customMetadata = {
-        leaf: Buffer.from(
-          keccak_256.digest(
-            Buffer.concat([
-              Buffer.from(metadata.name),
-              Buffer.from(download),
-              Buffer.from(origin),
-            ])
-          )
+        leaf: keccak_256.digest(
+          Buffer.concat([
+            Buffer.from(metadata.name),
+            Buffer.from(download),
+            Buffer.from(origin),
+          ])
         ),
       };
       //console.log(download);
@@ -60,12 +59,45 @@ export const getFileData = async (origin) => {
 
 //Update custom metadata
 export const updateFileData = async (path) => {
-  const storageRef = ref(storage, `${path}/`);
+  let newMetadata = {};
+  const origin = path;
+  const storageRef = ref(storage, `${origin}`);
+  const file = await listAll(storageRef);
+  console.log(file);
+  const download = await getDownloadURL(storageRef);
+  const metadata = await getMetadata(storageRef);
   // Create file metadata with property to modify
-  const newMetadata = {
-    customMetadata: { leaf: "new leaf" },
+  /* await Promise.all(
+    files.items.map(async (item) => {
+      if (item.fullPath == path) {
+        const download = await getDownloadURL(item);
+        const metadata = await getMetadata(item);
+        newMetadata = {
+          customMetadata: {
+            leaf: keccak_256.digest(
+              Buffer.concat([
+                Buffer.from(metadata.name),
+                Buffer.from(download),
+                Buffer.from(origin),
+              ])
+            ),
+          },
+        };
+      }
+    })
+  ); */
+  newMetadata = {
+    customMetadata: {
+      leaf: keccak_256(
+        Buffer.concat([
+          Buffer.from(metadata.name),
+          Buffer.from(download),
+          Buffer.from(origin),
+        ])
+      ),
+    },
   };
-
+  console.log("new metadata", newMetadata);
   // Update the metadata property
   await updateMetadata(storageRef, newMetadata)
     .then((metadata) => {
