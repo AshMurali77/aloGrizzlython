@@ -8,7 +8,8 @@ import {
 } from "firebase/storage";
 import { collection, getDocs } from "firebase/firestore";
 import { storage, db } from "../firebase";
-
+import { Buffer } from "buffer";
+import { keccak_256 } from "js-sha3";
 //Upload file to storage
 export const uploadFiles = (file) => {
   if (!file) return;
@@ -36,19 +37,44 @@ export const getFileData = async (origin) => {
   await Promise.all(
     files.items.map(async (item) => {
       const metadata = await getMetadata(item);
-      metadata.customMetadata = { testing: "leaf" };
       const download = await getDownloadURL(item);
-      console.log(download);
+      metadata.customMetadata = {
+        leaf: Buffer.from(
+          keccak_256.digest(
+            Buffer.concat([
+              Buffer.from(metadata.name),
+              Buffer.from(download),
+              Buffer.from(origin),
+            ])
+          )
+        ),
+      };
+      //console.log(download);
       file_data.push(metadata);
       download_data.push(download);
     })
   );
-  console.log(file_data);
+  console.log("file data", file_data);
   return [file_data, download_data];
 };
 
 //Update custom metadata
-export const updateFileData = async () => {};
+export const updateFileData = async (path) => {
+  const storageRef = ref(storage, `${path}/`);
+  // Create file metadata with property to modify
+  const newMetadata = {
+    customMetadata: { leaf: "new leaf" },
+  };
+
+  // Update the metadata property
+  await updateMetadata(storageRef, newMetadata)
+    .then((metadata) => {
+      console.log("metadata", metadata);
+    })
+    .catch((error) => {
+      console.log("error", error);
+    });
+};
 
 //Fetch students from cloud db
 export const getStudentData = async () => {

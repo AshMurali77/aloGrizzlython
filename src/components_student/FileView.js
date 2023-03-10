@@ -25,7 +25,7 @@ import { styled, useTheme } from "@mui/material/styles";
 import SendIcon from "@mui/icons-material/Send";
 import DownloadIcon from "@mui/icons-material/Download";
 //Util function imports
-import { getFileData } from "../utils/firebaseutils";
+import { getFileData, updateFileData } from "../utils/firebaseutils";
 import { requestToken } from "../utils/authToken";
 //Column Headers and Formatting
 const columns = [
@@ -35,8 +35,15 @@ const columns = [
 ];
 
 //Creating data for each row
-function createData(link, filename, filesize, accessdate) {
-  return { link, filename, filesize, accessdate };
+function createData(
+  link,
+  fullPath,
+  customMetadata,
+  filename,
+  filesize,
+  accessdate
+) {
+  return { link, fullPath, customMetadata, filename, filesize, accessdate };
 }
 //setting width of file preview drawer
 const drawerWidth = 350;
@@ -75,6 +82,8 @@ export default function FileView(props) {
       const newRowData = fileData.map((data, index) => {
         return createData(
           downloadData[index],
+          data.fullPath,
+          data.customMetadata,
           data.name,
           data.size,
           data.timeCreated
@@ -105,7 +114,9 @@ export default function FileView(props) {
 
   //File transfer
   const handleTransferFile = (e, docID) => {
-    requestToken(docID);
+    //requestToken(docID);
+    updateFileData(selected.fullPath);
+    getFileData("files");
   };
 
   return (
