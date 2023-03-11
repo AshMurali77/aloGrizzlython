@@ -40,12 +40,14 @@ export const getFileData = async (origin) => {
       const metadata = await getMetadata(item);
       const download = await getDownloadURL(item);
       metadata.customMetadata = {
-        leaf: keccak_256.digest(
-          Buffer.concat([
-            Buffer.from(metadata.name),
-            Buffer.from(download),
-            Buffer.from(origin),
-          ])
+        leaf: String.fromCharCode(
+          ...keccak_256.digest(
+            Buffer.concat([
+              Buffer.from(metadata.name),
+              Buffer.from(download),
+              Buffer.from(origin),
+            ])
+          )
         ),
       };
       //console.log(download);
@@ -66,34 +68,16 @@ export const updateFileData = async (path) => {
   console.log(file);
   const download = await getDownloadURL(storageRef);
   const metadata = await getMetadata(storageRef);
-  // Create file metadata with property to modify
-  /* await Promise.all(
-    files.items.map(async (item) => {
-      if (item.fullPath == path) {
-        const download = await getDownloadURL(item);
-        const metadata = await getMetadata(item);
-        newMetadata = {
-          customMetadata: {
-            leaf: keccak_256.digest(
-              Buffer.concat([
-                Buffer.from(metadata.name),
-                Buffer.from(download),
-                Buffer.from(origin),
-              ])
-            ),
-          },
-        };
-      }
-    })
-  ); */
   newMetadata = {
     customMetadata: {
-      leaf: keccak_256(
-        Buffer.concat([
-          Buffer.from(metadata.name),
-          Buffer.from(download),
-          Buffer.from(origin),
-        ])
+      leaf: String.fromCharCode(
+        ...keccak_256.digest(
+          Buffer.concat([
+            Buffer.from(metadata.name),
+            Buffer.from(download),
+            Buffer.from(origin),
+          ])
+        )
       ),
     },
   };

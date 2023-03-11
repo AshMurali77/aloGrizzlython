@@ -26,6 +26,7 @@ import SendIcon from "@mui/icons-material/Send";
 import DownloadIcon from "@mui/icons-material/Download";
 //Util function imports
 import { getFileData, updateFileData } from "../utils/firebaseutils";
+import { getLeavesFromFirebase } from "../utils/web3utils";
 import { requestToken } from "../utils/authToken";
 //Column Headers and Formatting
 const columns = [
@@ -117,6 +118,7 @@ export default function FileView(props) {
     //requestToken(docID);
     updateFileData(selected.fullPath);
     getFileData("files");
+    getLeavesFromFirebase("files");
   };
 
   return (

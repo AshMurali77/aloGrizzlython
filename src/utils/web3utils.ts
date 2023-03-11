@@ -6,6 +6,9 @@ import yaml from "yaml";
 import { keccak_256 } from "js-sha3";
 import { Buffer } from "buffer";
 import * as account from "@solana/spl-account-compression";
+import { ref, listAll, getMetadata } from "firebase/storage";
+import { storage } from "../firebase";
+
 //web3 program ID, solana program
 const programAddress = "CjRyYe35c7U8VBUgYoUQtwEvbgmqoi9ybzAbCurb13HH";
 export const programID = new web3.PublicKey(programAddress);
@@ -95,3 +98,28 @@ export function hashv(...pubkeys: web3.PublicKey): Buffer {
  */
 
 const mt = account.MerkleTree;
+
+//gets all leaf metadata and parse it into an array of buffers
+export const getLeavesFromFirebase = async (origin: string) => {
+  let leaf_data: Buffer[] = [];
+  const storageRef = ref(storage, `${origin}/`);
+  const files = await listAll(storageRef);
+  await Promise.all(
+    files.items.map(async (item) => {
+      const metadata = await getMetadata(item);
+      if (metadata.customMetadata) {
+        console.log(
+          "name",
+          metadata.name,
+          "leaf",
+          metadata.customMetadata.leaf.length,
+          "leaf buffer",
+          Buffer.from(metadata.customMetadata.leaf, "ascii")
+        );
+        leaf_data.push(Buffer.from(metadata.customMetadata.leaf, "ascii"));
+      }
+    })
+  );
+  console.log("leaf data", leaf_data);
+  return leaf_data;
+};
