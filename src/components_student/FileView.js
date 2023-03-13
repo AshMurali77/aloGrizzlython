@@ -24,6 +24,7 @@ import { styled, useTheme } from "@mui/material/styles";
 //material icon imports
 import SendIcon from "@mui/icons-material/Send";
 import DownloadIcon from "@mui/icons-material/Download";
+import { Task } from "@mui/icons-material";
 //Util function imports
 import { getFileData, updateFileData } from "../utils/firebaseutils";
 import { getLeavesFromFirebase } from "../utils/web3utils";
@@ -240,18 +241,45 @@ export default function FileView(props) {
           anchor={"right"}
           open={selected}
         >
-          <Box height={navHeight}></Box>
-          <Box mx={"auto"} justifyContent={"center"} alignItems={"center"}>
+          <Box
+            fontSize={18}
+            height={navHeight}
+            display={"inline-flex"}
+            alignItems={"center"}
+            justifyContent={"center"}
+          >
+            <Task fontSize="inherit" />
+            <Typography color={"#000"}>
+              {selected && selected.filename}
+            </Typography>
+          </Box>
+
+          <Box
+            width={"95%"}
+            height={"95%"}
+            borderRadius={5}
+            paddingTop={1}
+            justifyContent={"center"}
+            display={"flex"}
+            mx={"auto"}
+            bgcolor={"#F2F6FC"}
+          >
             {selected ? (
               <>
                 <Stack spacing={2}>
                   <Stack>
-                    <Typography>File Name</Typography>
+                    <Typography color={"#000"} fontSize={14}>
+                      Name
+                    </Typography>
                     <Typography color={"#000"}>{selected.filename}</Typography>
                   </Stack>
                   <Stack>
-                    <Typography>File Size</Typography>
+                    <Typography>Size</Typography>
                     <Typography color={"#000"}>{selected.filesize}</Typography>
+                  </Stack>
+                  <Stack>
+                    <Typography>Type</Typography>
+                    <Typography color={"#000"}>application/pdf</Typography>
                   </Stack>
                   <Stack>
                     <Typography>Access Date</Typography>
