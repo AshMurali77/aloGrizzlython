@@ -7,10 +7,20 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
-const NavBar = ({ width }) => {
-  const [page, setPage] = React.useState("student");
+import { useNavigate, useMatch } from "react-router-dom";
+const NavBar = ({ width, site }) => {
+  const institutionView = useMatch("/institution");
+  const [page, setPage] = React.useState(site);
+  let navigate = useNavigate();
+  const routeChange = () => {
+    console.log(institutionView);
+    let path = "";
+    institutionView ? (path = `/`) : (path = `/institution`);
+    navigate(path);
+  };
   const handleChange = (e) => {
     setPage(e.target.value);
+    routeChange();
   };
   console.log(width);
   return (
