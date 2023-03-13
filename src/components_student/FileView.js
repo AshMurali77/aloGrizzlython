@@ -25,7 +25,8 @@ import { styled, useTheme } from "@mui/material/styles";
 import SendIcon from "@mui/icons-material/Send";
 import DownloadIcon from "@mui/icons-material/Download";
 //Util function imports
-import { getFileData } from "../utils/firebaseutils";
+import { getFileData, updateFileData } from "../utils/firebaseutils";
+import { getLeavesFromFirebase } from "../utils/web3utils";
 import { requestToken } from "../utils/authToken";
 //Column Headers and Formatting
 const columns = [
@@ -35,8 +36,15 @@ const columns = [
 ];
 
 //Creating data for each row
-function createData(link, filename, filesize, accessdate) {
-  return { link, filename, filesize, accessdate };
+function createData(
+  link,
+  fullPath,
+  customMetadata,
+  filename,
+  filesize,
+  accessdate
+) {
+  return { link, fullPath, customMetadata, filename, filesize, accessdate };
 }
 //setting width of file preview drawer
 const drawerWidth = 350;
@@ -62,6 +70,8 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
 
 export default function FileView(props) {
   const navHeight = props.navHeight;
+  const fileScrollHeight = props.windowHeight - navHeight;
+
   const [rows, setRows] = React.useState([]);
   //for file search
   const [filteredRows, setFilteredRows] = React.useState([]);
@@ -75,6 +85,8 @@ export default function FileView(props) {
       const newRowData = fileData.map((data, index) => {
         return createData(
           downloadData[index],
+          data.fullPath,
+          data.customMetadata,
           data.name,
           data.size,
           data.timeCreated
@@ -105,99 +117,104 @@ export default function FileView(props) {
 
   //File transfer
   const handleTransferFile = (e, docID) => {
-    requestToken(docID);
+    //requestToken(docID);
+    updateFileData(selected.fullPath);
+    getFileData("files");
+    getLeavesFromFirebase("files");
   };
 
   return (
     <>
-      <Box display={"flex"} height={"100%"}>
+      <Box
+        backgroundColor={"#F6F7F9"}
+        display={"flex"}
+        height={fileScrollHeight}
+      >
         <Main open={selected}>
           <Box>
-            <Paper
-              component="form"
-              sx={{
-                backgroundColor: "#C4C4C4",
-                p: "2px",
-                display: "flex",
-                alignItems: "center",
-                borderRadius: 0,
-              }}
+            <TableContainer
+              component={Paper}
+              sx={{ height: fileScrollHeight / 1.5 }}
             >
-              <Autocomplete
-                id="free-solo-demo"
-                freeSolo
-                fullWidth
-                options={rows.map((row) => row.filename)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="outlined"
-                    InputProps={{
-                      ...params.InputProps,
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          {" "}
-                          <IconButton
-                            type="button"
-                            sx={{ p: "10px" }}
-                            aria-label="search"
-                          >
-                            <SearchIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                      style: { borderColor: "#C4C4C4" },
-                    }}
-                    placeholder="Search Files"
-                    onChange={handleSearch}
-                  />
-                )}
-              />
-            </Paper>
+              <Box
+                height="10%"
+                paddingTop={2}
+                display={"flex"}
+                alignItems={"center"}
+              >
+                <Autocomplete
+                  freeSolo
+                  fullWidth
+                  options={rows.map((row) => row.filename)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="standard"
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <IconButton
+                              type="button"
+                              sx={{ p: "10px" }}
+                              aria-label="search"
+                            >
+                              <SearchIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                        disableUnderline: true,
+                      }}
+                      placeholder="Search Files"
+                      onChange={handleSearch}
+                    />
+                  )}
+                />
+              </Box>
+              <Table
+                stickyHeader
+                aria-label="sticky table"
+                id="drawer-container"
+              >
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        align={column.align}
+                        style={{ minWidth: column.minWidth }}
+                      >
+                        {column.label}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row, index) => {
+                    const isItemSelected = selected === row;
+                    const labelId = `enhanced-table-checkbox-${index}`;
 
-            <Paper sx={{ overflow: "hidden" }}>
-              <TableContainer sx={{ maxHeight: "100%" }}>
-                <Table stickyHeader aria-label="sticky table">
-                  <TableHead>
-                    <TableRow>
-                      {columns.map((column) => (
-                        <TableCell
-                          key={column.id}
-                          align={column.align}
-                          style={{ minWidth: column.minWidth }}
-                        >
-                          {column.label}
+                    return (
+                      <TableRow
+                        hover
+                        onClick={(e) => handleSelect(e, row)}
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={index}
+                        selected={isItemSelected}
+                      >
+                        <TableCell component="th" id={labelId} scope="row">
+                          {row.filename}
                         </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.map((row, index) => {
-                      const isItemSelected = selected === row;
-                      const labelId = `enhanced-table-checkbox-${index}`;
-
-                      return (
-                        <TableRow
-                          hover
-                          onClick={(e) => handleSelect(e, row)}
-                          role="checkbox"
-                          aria-checked={isItemSelected}
-                          tabIndex={-1}
-                          key={index}
-                          selected={isItemSelected}
-                        >
-                          <TableCell component="th" id={labelId} scope="row">
-                            {row.filename}
-                          </TableCell>
-                          <TableCell>{row.filesize}</TableCell>
-                          <TableCell>{row.accessdate}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Paper>
+                        <TableCell>{row.filesize}</TableCell>
+                        <TableCell>{row.accessdate}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Box>
         </Main>
         <Drawer
@@ -209,15 +226,25 @@ export default function FileView(props) {
               boxSizing: "border-box",
             },
           }}
+          PaperProps={{
+            elevation: 1,
+            borderRadius: 25,
+            sx: {
+              height: fileScrollHeight / 1.5,
+              marginTop: "4.4%",
+              marginRight: "2%",
+              position: "absolute",
+            },
+          }}
           variant={"persistent"}
           anchor={"right"}
           open={selected}
         >
           <Box height={navHeight}></Box>
-          <Box>
+          <Box mx={"auto"} justifyContent={"center"} alignItems={"center"}>
             {selected ? (
               <>
-                <Stack spacing={0}>
+                <Stack spacing={2}>
                   <Stack>
                     <Typography>File Name</Typography>
                     <Typography color={"#000"}>{selected.filename}</Typography>

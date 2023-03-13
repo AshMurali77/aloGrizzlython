@@ -1,4 +1,3 @@
-import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Dashboard as Student } from "./components_student/Dashboard";
 import { Dashboard as Institution } from "./components_institution/Dashboard";

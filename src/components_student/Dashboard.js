@@ -1,12 +1,12 @@
 import * as React from "react";
 // MUI Component Imports
-import { Box, CssBaseline } from "@mui/material";
+import { Box, CssBaseline, Typography } from "@mui/material";
 // Component Imports
 import FileView from "./FileView";
 import Navbar from "./NavBar";
 import Sidebar from "./Sidebar";
 
-const drawerWidth = 256;
+const drawerWidth = 180;
 const navHeight = 64;
 
 export function Dashboard() {
@@ -15,8 +15,8 @@ export function Dashboard() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Navbar />
-      <Sidebar />
+      <Navbar width={windowSize.current[0] - drawerWidth} />
+      <Sidebar drawerWidth={drawerWidth} />
       <Box
         component="main"
         position="fixed"
@@ -25,18 +25,19 @@ export function Dashboard() {
         sx={{
           top: navHeight,
           left: drawerWidth,
-          bgcolor: "fff",
+          bgcolor: "#F6F7F9",
         }}
       >
-        <Box
-          height={windowSize.current[1] - navHeight / 2}
-          borderRight={1}
-          borderRightColor={"#000"}
-          sx={{
-            width: "100%",
-          }}
-        >
-          <FileView navHeight={navHeight} />
+        <Box marginLeft={"2%"} marginBottom={2}>
+          <Typography variant="h5" fontWeight={"bold"}>
+            Documents
+          </Typography>
+        </Box>
+        <Box marginLeft={"2%"} marginRight={"2%"}>
+          <FileView
+            windowHeight={windowSize.current[1]}
+            navHeight={navHeight}
+          />
         </Box>
       </Box>
     </Box>
