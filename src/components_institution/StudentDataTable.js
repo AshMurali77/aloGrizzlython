@@ -1,26 +1,31 @@
 import * as React from "react";
 import { DataGrid, GridFooter, GridFooterContainer } from "@mui/x-data-grid";
-import { getStudentData } from "../utils/firebaseutils";
+import { getStudentData, uploadFiles } from "../utils/firebaseutils";
 import { Box, Button } from "@mui/material";
-import { ChangeCircle, Send } from "@mui/icons-material";
+import { ChangeCircle, NoteAdd, Delete } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 
 export default function StudentDataTable(props) {
+  const handleFileUpload = (e) => {
+    e.preventDefault();
+    uploadFiles(e.target.files[0]);
+  };
   function CustomFooter() {
     return (
       <GridFooterContainer sx={{ justifyContent: "space-between" }}>
         <Box marginLeft={1}>
           <Button
             variant="contained"
-            endIcon={<Send />}
+            component="label"
+            endIcon={<NoteAdd />}
             sx={{ marginRight: 1 }}
-            onClick={() => props.setModalOpen(true)}
           >
             Mint Record
+            <input type="file" onChange={(e) => handleFileUpload(e)} hidden />
           </Button>
           <Button
             variant="contained"
-            endIcon={<Send />}
+            endIcon={<Delete />}
             onClick={() => console.log("burning!")}
           >
             Burn Record
