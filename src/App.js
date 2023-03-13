@@ -8,8 +8,15 @@ function App() {
       <header className="App-header">
         <Router>
           <Routes>
-            <Route path="/" element={<Student />} />
-            <Route path="/institution" element={<Institution />} />
+            <Route path="/*" element={<Student />} />
+            <Route
+              path="/institution-one"
+              element={<Institution number={"one"} />}
+            />
+            <Route
+              path="/institution-two"
+              element={<Institution number={"two"} />}
+            />
           </Routes>
         </Router>
       </header>

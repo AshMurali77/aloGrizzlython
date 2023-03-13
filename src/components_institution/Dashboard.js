@@ -8,7 +8,7 @@ import Navbar from "../components_student/NavBar";
 import Sidebar from "./Sidebar";
 const navHeight = 64;
 const drawerWidth = 160;
-export function Dashboard() {
+export function Dashboard({ number }) {
   //Show student versus incoming files view
   const [view, setView] = React.useState("student");
   //get screen size
@@ -16,7 +16,10 @@ export function Dashboard() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Navbar site="institution" width={windowSize.current[0] - drawerWidth} />
+      <Navbar
+        site={`institution-${number}`}
+        width={windowSize.current[0] - drawerWidth}
+      />
       <Sidebar drawerWidth={drawerWidth} setView={setView} />
       <Box
         component="main"

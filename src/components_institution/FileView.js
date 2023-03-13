@@ -28,6 +28,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { getFileData, updateFileData } from "../utils/firebaseutils";
 import { getLeavesFromFirebase } from "../utils/web3utils";
 import { requestToken } from "../utils/authToken";
+import { useLocation } from "react-router-dom";
 //Column Headers and Formatting
 const columns = [
   { id: "filename", label: "File Name", minWidth: 170 },
@@ -69,6 +70,10 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
 );
 
 export default function FileView(props) {
+  let origin =
+    useLocation().pathname === "/institution-one"
+      ? "students"
+      : "institution-two";
   const navHeight = props.navHeight;
   const fileScrollHeight = props.windowHeight - navHeight;
 
@@ -81,7 +86,7 @@ export default function FileView(props) {
   //access row data and load it into the rows
   React.useEffect(() => {
     const loadRowData = async () => {
-      const [fileData, downloadData] = await getFileData("students");
+      const [fileData, downloadData] = await getFileData(origin);
       const newRowData = fileData.map((data, index) => {
         return createData(
           downloadData[index],
@@ -97,7 +102,7 @@ export default function FileView(props) {
       setFilteredRows(newRowData);
     };
     loadRowData();
-  }, []);
+  }, [origin]);
 
   //File Search
   const handleSearch = (e) => {
