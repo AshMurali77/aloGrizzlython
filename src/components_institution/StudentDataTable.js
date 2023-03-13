@@ -3,6 +3,7 @@ import { DataGrid, GridFooter, GridFooterContainer } from "@mui/x-data-grid";
 import { getStudentData } from "../utils/firebaseutils";
 import { Box, Button } from "@mui/material";
 import { ChangeCircle, Send } from "@mui/icons-material";
+import { useLocation } from "react-router-dom";
 
 export default function StudentDataTable(props) {
   function CustomFooter() {
@@ -93,10 +94,15 @@ export default function StudentDataTable(props) {
     return { id, classification, firstName, lastName, credits, major };
   }
 
+  let origin =
+    useLocation().pathname === "/institution-one"
+      ? "students"
+      : "institution-two";
+
   //Loads Row Data from db
   React.useEffect(() => {
     const loadRowData = async () => {
-      const studentData = await getStudentData("students");
+      const studentData = await getStudentData(origin);
       console.log("studentData", studentData);
       const newRowData = studentData.map((student) => {
         return createData(
@@ -112,7 +118,7 @@ export default function StudentDataTable(props) {
       setRows(newRowData);
     };
     loadRowData();
-  }, []);
+  }, [origin]);
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <DataGrid
