@@ -9,22 +9,23 @@ const layout = BufferLayout.struct([
   BufferLayout.seq(BufferLayout.u8(), 32, "root"),
   BufferLayout.seq(BufferLayout.u8(), 32, "previousLeaf"),
   BufferLayout.seq(BufferLayout.u8(), 32, "newLeaf"),
-  BufferLayout.seq(BufferLayout.seq(BufferLayout.u8(), 32, "proofNode"), 24, "proof"),
+  BufferLayout.seq(BufferLayout.seq(BufferLayout.u8(), 32, "proofNode"), 14, "proof"),
   BufferLayout.u32("index"),
 ]);
   //const appendInstructionDiscriminator = 1;
 
-export default function createReplaceInstruction(localPubkey, merklePubkey, merkleTree, leafIndex, newLeaf, programId = programID) {
-    const data = Buffer.alloc(layout.span);
+export default function createReplaceInstruction(localPubkey, merklePubkey, merkleTree, leafIndex, newLeaf, proof, programId = programID) {
+  const data = Buffer.alloc(layout.span);
   const root = merkleTree.root;
-  const proof = getProof(leafIndex);
+  console.log(proof);
   layout.encode(
     {
       instruction: 2,
       root: root,
       previousLeaf : proof.leaf,
       newLeaf : newLeaf,
-      proof: proof.proof,
+      proof: proof,
+      index : leafIndex
     },
     data
   );

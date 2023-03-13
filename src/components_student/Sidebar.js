@@ -20,7 +20,7 @@ import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import ArticleIcon from "@mui/icons-material/Article";
 import SchoolIcon from "@mui/icons-material/School";
 import SearchIcon from "@mui/icons-material/Search";
-import { systemProgram, rentSysvar, programID, merkleKeypair, localKeypair, getLeavesFromFirebase, buildTree, appendToTree, buildEmptyTree} from "../utils/web3utils";
+import { systemProgram, rentSysvar, programID, merkleKeypair, localKeypair, getProof, appendToTree, buildEmptyTree} from "../utils/web3utils";
 import createInitEmptyMerkleTreeInstruction from "../utils/initEmptyMerkleTree.js";
 import createAppendInstruction from "../utils/append";
 import createReplaceInstruction from "../utils/replace";
@@ -42,7 +42,7 @@ export default function Sidebar({ drawerWidth }) {
   React.useEffect(() => {
     const airdrop = async () => {
       console.log("aidropping now");
-      rent = await connection.getMinimumBalanceForRentExemption(828224);
+      rent = await connection.getMinimumBalanceForRentExemption(31744);
       const airdrop = await connection.requestAirdrop(
         localKeypair.publicKey,
         rent + 1 * web3.LAMPORTS_PER_SOL
@@ -79,7 +79,7 @@ export default function Sidebar({ drawerWidth }) {
       fromPubkey: localKeypair.publicKey,
       newAccountPubkey: merkleKeypair.publicKey,
       lamports: rent,
-      space: 828224,
+      space: 31744,
       programId: programID,
     })
 
@@ -151,7 +151,7 @@ export default function Sidebar({ drawerWidth }) {
   const handleReplaceClick = async () => {
     //let merkle = new MerkleTree(await getLeavesFromFirebase("files"));
     let merkle = buildEmptyTree();
-    let index = 0;
+    let index = 1;
     let newLeaf = Buffer.from(keccak_256.digest("/*Buffer.concat(/*metadata)*/"));
     let leafData = keccak_256.digest(
       Buffer.concat([
@@ -168,14 +168,19 @@ export default function Sidebar({ drawerWidth }) {
       leafData
     );
 
-    merkle = appendToTree(merkle, leafData);
+    console.log(merkle);
 
+    let new_merkle = appendToTree(merkle, leafData);
+    let proof = await getProof(new_merkle, index);
+    console.log(new_merkle);
+    console.log(proof.proof);
     let replaceInstruction = createReplaceInstruction(
       localKeypair.publicKey,
       merkleKeypair.publicKey,
       merkle,
       index,
-      newLeaf
+      leafData,
+      proof.proof,
       )
     const instructions = [computeInstruction, appendInstruction, replaceInstruction];
 

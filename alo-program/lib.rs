@@ -3,7 +3,7 @@ pub mod processor;
 pub mod instruction;
 //pub mod state;
 
-solana_program::declare_id!("4XS8Hp1sUMUKYZJDPNM9ZivQqS5pjPyx2BGMzAYJxppZ");
+solana_program::declare_id!("9AAixeznnJ7kQCxgHQ2dJr5j9S1m8S9dkc1BZRuModBT");
 
 
 #[cfg(test)]
@@ -17,8 +17,8 @@ mod tests {
 
     #[test]
     pub fn it_works() {
-        let mut merkle : ConcurrentMerkleTree<24,1024> = ConcurrentMerkleTree::new();
-        let size = size_of::<ConcurrentMerkleTree<24,1024>>();
+        let mut merkle : ConcurrentMerkleTree<14,64> = ConcurrentMerkleTree::new();
+        let size = size_of::<ConcurrentMerkleTree<14,64>>();
         let rent = Rent::default();
         let instruction_size = size_of::<ProgramInstruction>();
         let root = merkle.initialize().unwrap();

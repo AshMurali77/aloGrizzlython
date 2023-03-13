@@ -10,7 +10,7 @@ import { ref, listAll, getMetadata } from "firebase/storage";
 import { storage } from "../firebase";
 
 //web3 program ID, solana program
-const programAddress = "4XS8Hp1sUMUKYZJDPNM9ZivQqS5pjPyx2BGMzAYJxppZ";
+const programAddress = "9AAixeznnJ7kQCxgHQ2dJr5j9S1m8S9dkc1BZRuModBT";
 export const merkleKeypair = web3.Keypair.generate();
 export const localKeypair = web3.Keypair.generate();
 export const programID = new web3.PublicKey(programAddress);
@@ -22,29 +22,30 @@ export const rentSysvar = new web3.PublicKey(
 );
 
 
-export async function buildTree () {
+/* export async function buildTree () {
   let leaf_buffers = await getLeavesFromFirebase("files");
   console.log(leaf_buffers);
   return new MerkleTree(leaf_buffers);
-}
+} */
 
 export function buildEmptyTree () {
   let leaves : Buffer[] = []
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < (24); i++) {
     leaves.push(Buffer.from(Array(32).fill(0)))
   }
   console.log(leaves);
-  return new MerkleTree(leaves);
+  return MerkleTree.sparseMerkleTreeFromLeaves(leaves, 14);
 }
 
 export function appendToTree (merkle : MerkleTree, leaf_data : number[]) {
-  merkle.updateLeaf(0, Buffer.from(leaf_data));
+  merkle.updateLeaf(1, Buffer.from(leaf_data));
   return merkle;
 }
 
-export async function getProof (leafIndex : number) {
-  let merkle = await buildTree();
-  merkle.getProof(leafIndex, false, 24);
+export async function getProof (merkle : MerkleTree, leafIndex : number) {
+  //let merkle = await buildTree();
+  console.log(merkle.getProof(leafIndex));
+  return merkle.getProof(leafIndex);
 }
 
 /* 

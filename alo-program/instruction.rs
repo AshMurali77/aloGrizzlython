@@ -25,7 +25,7 @@ pub enum ProgramInstruction {
         #[allow(dead_code)]
         new_leaf : Node,
         #[allow(dead_code)]
-        proof : [ Node; 24],
+        proof : [ Node; 14],
         #[allow(dead_code)]
         node_index : u32,
     },
@@ -40,7 +40,7 @@ pub enum ProgramInstruction {
 impl Sealed for ProgramInstruction {}
 
 impl Pack for ProgramInstruction {
-    const LEN : usize = 872;
+    const LEN : usize = 552;
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let data = self.pack_into_vec();

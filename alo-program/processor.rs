@@ -57,7 +57,7 @@ pub fn process_instruction (
                 ])?;
  */
             let merkle_bytes = &mut merkle_info.try_borrow_mut_data().unwrap();
-            let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<24,1024>>(merkle_bytes).unwrap();
+            let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<14,64>>(merkle_bytes).unwrap();
             let _root = merkle.initialize().unwrap();
 
             msg!("{:?}", merkle.get_root());
@@ -75,7 +75,7 @@ pub fn process_instruction (
             //let system_program_info = next_account_info(account_info_iter)?;
 
             let mut merkle_bytes = merkle_info.try_borrow_mut_data().unwrap();
-            let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<24,1024>>(&mut merkle_bytes).unwrap();
+            let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<14,64>>(&mut merkle_bytes).unwrap();
 
             //if merkle.is_initialized() {
             merkle.append(tree_address).unwrap();
@@ -95,8 +95,13 @@ pub fn process_instruction (
             let _funder_info = next_account_info(account_info_iter)?;
             let merkle_info = next_account_info(account_info_iter)?;
 
+            msg!("Root: {:?}", tree_address);
+            msg!("Previous Leaf: {:?}", previous_leaf);
+            msg!("New Leaf: {:?}", new_leaf);
+            msg!("Proof: {:?}", proof);
+
             let mut merkle_bytes = merkle_info.try_borrow_mut_data().unwrap();
-            let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<24,1024>>(&mut merkle_bytes).unwrap();
+            let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<14,64>>(&mut merkle_bytes).unwrap();
 
             let proof_slice = proof.as_slice();
 
