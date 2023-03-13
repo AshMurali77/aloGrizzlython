@@ -1,5 +1,5 @@
 import * as web3 from "@solana/web3.js";
-import { programID, addProof } from "./web3utils";
+import { programID, getProof} from "./web3utils";
 import { Buffer } from "buffer";
 import * as BufferLayout from "@solana/buffer-layout";
 import { keccak_256 } from "js-sha3";
@@ -9,35 +9,22 @@ const layout = BufferLayout.struct([
   BufferLayout.seq(BufferLayout.u8(), 32, "root"),
   BufferLayout.seq(BufferLayout.u8(), 32, "previousLeaf"),
   BufferLayout.seq(BufferLayout.u8(), 32, "newLeaf"),
+  BufferLayout.seq(BufferLayout.seq(BufferLayout.u8(), 32, "proofNode"), 24, "proof"),
   BufferLayout.u32("index"),
 ]);
-//const appendInstructionDiscriminator = 1;
-function createReplaceIx(localPubkey, merklePubkey, programId = programID) {
-  console.log(
-    "buffer",
-    Buffer.from(
-      keccak_256.digest(
-        Buffer.concat([
-          Buffer.from(localPubkey.toBase58()),
-          Buffer.from(merklePubkey.toBase58()),
-          Buffer.from(programID.toBase58()),
-        ])
-      )
-    )
-  );
-  const data = Buffer.alloc(layout.span);
+  //const appendInstructionDiscriminator = 1;
+
+export default function createReplaceInstruction(localPubkey, merklePubkey, merkleTree, leafIndex, newLeaf, programId = programID) {
+    const data = Buffer.alloc(layout.span);
+  const root = merkleTree.root;
+  const proof = getProof(leafIndex);
   layout.encode(
     {
       instruction: 2,
-      root: Buffer.from(
-        keccak_256.digest(
-          Buffer.concat([
-            Buffer.from(localPubkey.toBase58()),
-            Buffer.from(merklePubkey.toBase58()),
-            Buffer.from(programID.toBase58()),
-          ])
-        )
-      ),
+      root: root,
+      previousLeaf : proof.leaf,
+      newLeaf : newLeaf,
+      proof: proof.proof,
     },
     data
   );
@@ -55,28 +42,24 @@ function createReplaceIx(localPubkey, merklePubkey, programId = programID) {
   return instruction;
 }
 
-export default function createReplaceInstruction(
+/* export default function createReplaceInstruction(
   merkleTree,
   localPubkey,
   newLeaf,
-  proof
 ) {
-  return addProof(
     createReplaceIx(
       {
-        merkleTree,
         localPubkey,
+        merkleTree,
       },
       {
-        root: Array.from(proof.root),
-        previousLeaf: Array.from(proof.leaf),
-        newLeaf: Array.from(newLeaf),
+        root: Buffer.from(proof.root),
+        previousLeaf: Buffer.from(proof.leaf),
+        newLeaf: Buffer.from(newLeaf),
         index: proof.leafIndex,
       }
-    ),
-    proof.proof
-  );
-}
+    );
+} */
 
 /* export function addProof(
   instruction: web3.TransactionInstruction,

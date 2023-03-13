@@ -5,12 +5,12 @@ import path from "path";
 import yaml from "yaml";
 import { keccak_256 } from "js-sha3";
 import { Buffer } from "buffer";
-import * as account from "@solana/spl-account-compression";
+import { MerkleTree, MerkleTreeProof } from "@solana/spl-account-compression";
 import { ref, listAll, getMetadata } from "firebase/storage";
 import { storage } from "../firebase";
 
 //web3 program ID, solana program
-const programAddress = "CjRyYe35c7U8VBUgYoUQtwEvbgmqoi9ybzAbCurb13HH";
+const programAddress = "EWqDSAKQHh68KU3j1xt2GdpA98nY8C3MZtnCkot4xcSx";
 export const programID = new web3.PublicKey(programAddress);
 export const systemProgram = new web3.PublicKey(
   "11111111111111111111111111111111"
@@ -18,32 +18,33 @@ export const systemProgram = new web3.PublicKey(
 export const rentSysvar = new web3.PublicKey(
   "SysvarRent111111111111111111111111111111111"
 );
-/**
- * Helper function that adds proof nodes to a TransactionInstruction
- * by adding extra keys to the transaction
- */
-export function addProof(
-  instruction: web3.TransactionInstruction,
-  nodeProof: Buffer[]
-): web3.TransactionInstruction {
-  instruction.keys = instruction.keys.concat(
-    nodeProof.map((node) => {
-      return {
-        pubkey: new web3.PublicKey(node),
-        isSigner: false,
-        isWritable: false,
-      };
-    })
-  );
-  return instruction;
+
+
+export async function buildTree () {
+  let leaf_buffers = await getLeavesFromFirebase("files");
+  console.log(leaf_buffers);
+  return new MerkleTree(leaf_buffers);
 }
 
-export type MerkleTreeProof = {
-  leafIndex: number;
-  leaf: Buffer;
-  proof: Buffer[];
-  root: Buffer;
-};
+export function buildEmptyTree () {
+  let leaves : Buffer[] = []
+  for (let i = 0; i < 24; i++) {
+    leaves.push(Buffer.from(Array(32).fill(0)))
+  }
+  console.log(leaves);
+  return new MerkleTree(leaves);
+}
+
+export function appendToTree (merkle : MerkleTree, leaf_data : number[]) {
+  merkle.updateLeaf(0, Buffer.from(leaf_data));
+  return merkle;
+}
+
+export async function getProof (leafIndex : number) {
+  let merkle = await buildTree();
+  merkle.getProof(leafIndex, false, 24);
+}
+
 /* 
 export async function getConfig(): Promise<any> {
   // Path to Solana CLI config file
@@ -97,7 +98,6 @@ export function hashv(...pubkeys: web3.PublicKey): Buffer {
 }
  */
 
-const mt = account.MerkleTree;
 
 //gets all leaf metadata and parse it into an array of buffers
 export const getLeavesFromFirebase = async (origin: string) => {

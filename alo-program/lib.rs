@@ -3,7 +3,7 @@ pub mod processor;
 pub mod instruction;
 //pub mod state;
 
-solana_program::declare_id!("CjRyYe35c7U8VBUgYoUQtwEvbgmqoi9ybzAbCurb13HH");
+solana_program::declare_id!("EWqDSAKQHh68KU3j1xt2GdpA98nY8C3MZtnCkot4xcSx");
 
 
 #[cfg(test)]
@@ -11,6 +11,7 @@ mod tests {
     use spl_concurrent_merkle_tree::concurrent_merkle_tree::ConcurrentMerkleTree;
     use std::mem::size_of;
     use solana_program::{keccak::hashv,sysvar::rent::Rent,};
+    use crate::instruction::ProgramInstruction;
     //use crate::state::{DocTree, Changelog, RightmostProof};
 
 
@@ -19,6 +20,7 @@ mod tests {
         let mut merkle : ConcurrentMerkleTree<24,1024> = ConcurrentMerkleTree::new();
         let size = size_of::<ConcurrentMerkleTree<24,1024>>();
         let rent = Rent::default();
+        let instruction_size = size_of::<ProgramInstruction>();
         let root = merkle.initialize().unwrap();
         let new_node = merkle.append(hashv(&[&[1,2,3,4,5]]).to_bytes()).unwrap();
 
@@ -28,6 +30,7 @@ mod tests {
         let tree_struct = DocTree {root : root ,rightmost_proof : rightmost_proof_struct, change_logs : changelog_array, authority : id().to_bytes()};
         */
         println!("Merkle Tree Size: {:?}", size);
+        println!("Instruction Size: {:?}", instruction_size);
         println!("Merkle Tree Rent: {:?}", rent.minimum_balance(size));
         println!("Merkle Tree Initial Root: {:?}", root);
         println!("Root from tree: {:?}", merkle.get_root());

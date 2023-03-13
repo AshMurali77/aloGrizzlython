@@ -1,6 +1,6 @@
 import * as beet from "@metaplex-foundation/beet";
 import * as web3 from "@solana/web3.js";
-import { addProof, MerkleTreeProof, programID } from "./web3utils";
+import { programID } from "./web3utils";
 
 type VerifyLeafInstructionArgs = {
   root: number[] /* size: 32 */;
@@ -67,7 +67,7 @@ function createVerifyLeafInstruction(
   return ix;
 }
 
-export function createVerifyLeafIx(
+/* export function createVerifyLeafIx(
   merkleTree: web3.PublicKey,
   proof: MerkleTreeProof
 ): web3.TransactionInstruction {
@@ -84,4 +84,4 @@ export function createVerifyLeafIx(
     ),
     proof.proof
   );
-}
+} */

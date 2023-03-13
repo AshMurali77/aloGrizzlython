@@ -20,11 +20,13 @@ import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import ArticleIcon from "@mui/icons-material/Article";
 import SchoolIcon from "@mui/icons-material/School";
 import SearchIcon from "@mui/icons-material/Search";
-import { systemProgram, rentSysvar, programID } from "../utils/web3utils";
+import { systemProgram, rentSysvar, programID, getLeavesFromFirebase, buildTree, appendToTree, buildEmptyTree} from "../utils/web3utils";
 import createInitEmptyMerkleTreeInstruction from "../utils/initEmptyMerkleTree.js";
 import createAppendInstruction from "../utils/append";
 import createReplaceInstruction from "../utils/replace";
 import * as web3 from "@solana/web3.js";
+import { MerkleTree, hash } from "@solana/spl-account-compression";
+import { keccak_256 } from "js-sha3";
 
 //establish connection
 const connection = new web3.Connection(
@@ -74,14 +76,16 @@ export default function Sidebar({ drawerWidth }) {
       merkleKeypair.publicKey.toBase58()
     );
 
+    let createAccountInstruction = web3.SystemProgram.createAccount({
+      fromPubkey: localKeypair.publicKey,
+      newAccountPubkey: merkleKeypair.publicKey,
+      lamports: rent,
+      space: 828224,
+      programId: programID,
+    })
+
     let createAccountTransaction = new web3.Transaction().add(
-      web3.SystemProgram.createAccount({
-        fromPubkey: localKeypair.publicKey,
-        newAccountPubkey: merkleKeypair.publicKey,
-        lamports: rent,
-        space: 828224,
-        programId: programID,
-      })
+      createAccountInstruction
     );
 
     await web3.sendAndConfirmTransaction(connection, createAccountTransaction, [
@@ -109,14 +113,21 @@ export default function Sidebar({ drawerWidth }) {
     transaction.sign([localKeypair, merkleKeypair]);
     //const signature = await connection.sendTransaction(transaction);
     await connection
-      .simulateTransaction(transaction)
+      .sendTransaction(transaction)
       .then((res) => console.log("success :)", res.value));
   };
 
   const handleAppendClick = async () => {
     let instruction = createAppendInstruction(
       localKeypair.publicKey,
-      merkleKeypair.publicKey
+      merkleKeypair.publicKey,
+      keccak_256.digest(
+        Buffer.concat([
+          Buffer.from(localKeypair.publicKey.toBase58()),
+          Buffer.from(merkleKeypair.publicKey.toBase58()),
+          Buffer.from(programID.toBase58()),
+        ])
+      )
     );
     const instructions = [instruction];
     const {
@@ -134,18 +145,46 @@ export default function Sidebar({ drawerWidth }) {
     await connection
       .simulateTransaction(transaction)
       .then((res) => console.log("success :)", res.value));
+    await connection.sendTransaction(transaction);
+    
   };
 
   const handleReplaceClick = async () => {
-    let instruction = createReplaceInstruction(
+    //let merkle = new MerkleTree(await getLeavesFromFirebase("files"));
+    let merkle = buildEmptyTree();
+    let index = 0;
+    let newLeaf = Buffer.from(keccak_256.digest("/*Buffer.concat(/*metadata)*/"));
+    let leafData = keccak_256.digest(
+      Buffer.concat([
+        Buffer.from(localKeypair.publicKey.toBase58()),
+        Buffer.from(merkleKeypair.publicKey.toBase58()),
+        Buffer.from(programID.toBase58()),
+      ])
+    )
+    let computeInstruction = web3.ComputeBudgetProgram.setComputeUnitLimit({units: 500000})
+
+    let appendInstruction = createAppendInstruction(
       localKeypair.publicKey,
-      merkleKeypair.publicKey
+      merkleKeypair.publicKey,
+      leafData
     );
-    const instructions = [instruction];
-    const {
+
+    merkle = appendToTree(merkle, leafData);
+
+    let replaceInstruction = createReplaceInstruction(
+      localKeypair.publicKey,
+      merkleKeypair.publicKey,
+      merkle,
+      index,
+      newLeaf
+      )
+    const instructions = [computeInstruction, appendInstruction, replaceInstruction];
+
+    /* const {
       context: { slot: minContextSlot },
       value: { blockhash, lastValidBlockHeight },
-    } = await connection.getLatestBlockhashAndContext();
+    } = await connection.getLatestBlockhashAndContext(); */
+    const {blockhash, blockheight} = await connection.getLatestBlockhash();
     const message = new web3.TransactionMessage({
       payerKey: localKeypair.publicKey,
       recentBlockhash: blockhash,

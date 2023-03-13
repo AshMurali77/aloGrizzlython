@@ -12,6 +12,7 @@ const layout = BufferLayout.struct([
 export default function createAppendInstruction(
   localPubkey,
   merklePubkey,
+  leafData,
   programId = programID
 ) {
   console.log(
@@ -31,14 +32,17 @@ export default function createAppendInstruction(
     {
       instruction: 1,
       leaf: Buffer.from(
-        keccak_256.digest(
-          Buffer.concat([
-            Buffer.from(localPubkey.toBase58()),
-            Buffer.from(merklePubkey.toBase58()),
-            Buffer.from(programID.toBase58()),
-          ])
-        )
+        leafData
       ),
+      /*
+      //Possible leaf data serialization
+      instruction : 1,
+      leaf : Buffer.from(
+        keccak_256.digest(
+          Buffer.from(leafData)
+        )
+      )
+      */
     },
     data
   );
