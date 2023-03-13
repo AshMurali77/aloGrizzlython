@@ -1,9 +1,39 @@
 import * as React from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridFooter, GridFooterContainer } from "@mui/x-data-grid";
 import { getStudentData } from "../utils/firebaseutils";
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
+import { ChangeCircle, Send } from "@mui/icons-material";
+import { useLocation } from "react-router-dom";
 
 export default function StudentDataTable(props) {
+  function CustomFooter() {
+    return (
+      <GridFooterContainer sx={{ justifyContent: "space-between" }}>
+        <Box marginLeft={1}>
+          <Button
+            variant="contained"
+            endIcon={<Send />}
+            sx={{ marginRight: 1 }}
+            onClick={() => props.setModalOpen(true)}
+          >
+            Mint Record
+          </Button>
+          <Button
+            variant="contained"
+            endIcon={<Send />}
+            onClick={() => console.log("burning!")}
+          >
+            Burn Record
+          </Button>
+        </Box>
+        <GridFooter
+          sx={{
+            border: "none", // To delete double border.
+          }}
+        />
+      </GridFooterContainer>
+    );
+  }
   //drawer width for column sizing
   const drawerWidth = props.drawerWidth;
   //Data table rows
@@ -30,6 +60,33 @@ export default function StudentDataTable(props) {
       valueGetter: (params) =>
         `${params.row.firstName || ""} ${params.row.lastName || ""}`,
     },
+    {
+      field: "modifyRecord",
+      headerName: "Modify Record",
+      width: 160,
+      sortable: false,
+      renderCell: (params) => {
+        const onClick = (e) => {
+          const api = params.api;
+          const thisRow = {};
+
+          api
+            .getAllColumns()
+            .filter((c) => c.field !== "__check__" && !!c)
+            .forEach(
+              (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
+            );
+
+          return alert(JSON.stringify(thisRow, null, 4));
+        };
+
+        return (
+          <Button sx={{ width: 160 }} variant="text" onClick={onClick}>
+            <ChangeCircle />
+          </Button>
+        );
+      },
+    },
   ];
 
   //Creating data for each row
@@ -37,10 +94,15 @@ export default function StudentDataTable(props) {
     return { id, classification, firstName, lastName, credits, major };
   }
 
+  let origin =
+    useLocation().pathname === "/institution-one"
+      ? "students"
+      : "institution-two";
+
   //Loads Row Data from db
   React.useEffect(() => {
     const loadRowData = async () => {
-      const studentData = await getStudentData("students");
+      const studentData = await getStudentData(origin);
       console.log("studentData", studentData);
       const newRowData = studentData.map((student) => {
         return createData(
@@ -56,7 +118,7 @@ export default function StudentDataTable(props) {
       setRows(newRowData);
     };
     loadRowData();
-  }, []);
+  }, [origin]);
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <DataGrid
@@ -65,6 +127,7 @@ export default function StudentDataTable(props) {
         pageSize={9}
         rowsPerPageOptions={[9]}
         checkboxSelection
+        components={{ Footer: CustomFooter }}
       />
     </div>
   );

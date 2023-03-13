@@ -10,7 +10,9 @@ import { ref, listAll, getMetadata } from "firebase/storage";
 import { storage } from "../firebase";
 
 //web3 program ID, solana program
-const programAddress = "EWqDSAKQHh68KU3j1xt2GdpA98nY8C3MZtnCkot4xcSx";
+const programAddress = "4XS8Hp1sUMUKYZJDPNM9ZivQqS5pjPyx2BGMzAYJxppZ";
+export const merkleKeypair = web3.Keypair.generate();
+export const localKeypair = web3.Keypair.generate();
 export const programID = new web3.PublicKey(programAddress);
 export const systemProgram = new web3.PublicKey(
   "11111111111111111111111111111111"

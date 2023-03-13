@@ -20,7 +20,7 @@ import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import ArticleIcon from "@mui/icons-material/Article";
 import SchoolIcon from "@mui/icons-material/School";
 import SearchIcon from "@mui/icons-material/Search";
-import { systemProgram, rentSysvar, programID, getLeavesFromFirebase, buildTree, appendToTree, buildEmptyTree} from "../utils/web3utils";
+import { systemProgram, rentSysvar, programID, merkleKeypair, localKeypair, getLeavesFromFirebase, buildTree, appendToTree, buildEmptyTree} from "../utils/web3utils";
 import createInitEmptyMerkleTreeInstruction from "../utils/initEmptyMerkleTree.js";
 import createAppendInstruction from "../utils/append";
 import createReplaceInstruction from "../utils/replace";
@@ -34,8 +34,7 @@ const connection = new web3.Connection(
   "http://127.0.0.1:8899",
   "confirmed"
 );
-const merkleKeypair = web3.Keypair.generate();
-const localKeypair = web3.Keypair.generate();
+
 let rent = 0;
 
 export default function Sidebar({ drawerWidth }) {

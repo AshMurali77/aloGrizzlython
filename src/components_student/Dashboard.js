@@ -15,7 +15,7 @@ export function Dashboard() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <Navbar width={windowSize.current[0] - drawerWidth} />
+      <Navbar site="student" width={windowSize.current[0] - drawerWidth} />
       <Sidebar drawerWidth={drawerWidth} />
       <Box
         component="main"

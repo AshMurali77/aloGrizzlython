@@ -7,12 +7,17 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
-const NavBar = ({ width }) => {
-  const [page, setPage] = React.useState("student");
-  const handleChange = (e) => {
-    setPage(e.target.value);
-  };
-  console.log(width);
+import { useNavigate } from "react-router-dom";
+const NavBar = ({ width, site }) => {
+  let path = "";
+  const [page, setPage] = React.useState(site);
+  let navigate = useNavigate();
+  React.useEffect(() => {
+    console.log("page", page);
+    path = page;
+    navigate(`/${path}`);
+  }, [page]);
+
   return (
     <AppBar
       position="fixed"
@@ -28,13 +33,14 @@ const NavBar = ({ width }) => {
         <TextField
           select
           value={page}
-          onChange={handleChange}
+          onChange={(e) => setPage(e.target.value)}
           sx={{ minWidth: 120 }}
           InputProps={{ disableUnderline: true }}
           variant="standard"
         >
           <MenuItem value="student">Student View</MenuItem>
-          <MenuItem value="institution">Institution View</MenuItem>
+          <MenuItem value="institution-one">Institution One View</MenuItem>
+          <MenuItem value="institution-two">Institution Two View</MenuItem>
         </TextField>
         <IconButton>
           <Avatar>A</Avatar>

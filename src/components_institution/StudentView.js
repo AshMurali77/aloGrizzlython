@@ -20,15 +20,10 @@ const StudentView = (props) => {
     //burnTranscript();
   };
 
-  //Record Modification
-  const handleModifyRecord = (e) => {
-    //modifyTranscript();
-  };
-
   return (
     <Box height={"100%"}>
       <Box height={"80%"}>
-        <StudentDataTable drawerWidth />
+        <StudentDataTable setModalOpen={setModalOpen} drawerWidth />
       </Box>
       <Box height={"20%"}>
         <Modal
@@ -55,27 +50,6 @@ const StudentView = (props) => {
             </Typography>
           </Box>
         </Modal>
-        <Button
-          variant="contained"
-          endIcon={<SendIcon />}
-          onClick={(e) => handleMint(e)}
-        >
-          Mint Record
-        </Button>
-        <Button
-          variant="contained"
-          onClick={(e) => handleBurnRecord(e)}
-          endIcon={<SendIcon />}
-        >
-          Burn Record
-        </Button>
-        <Button
-          variant="contained"
-          onClick={(e) => handleModifyRecord(e)}
-          endIcon={<SendIcon />}
-        >
-          Modify Record
-        </Button>
       </Box>
     </Box>
   );
