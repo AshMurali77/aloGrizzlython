@@ -100,7 +100,7 @@ export default function Sidebar() {
     //const signature = await connection.sendTransaction(transaction);
     await connection
       .simulateTransaction(transaction)
-      .then((res) => console.log("success :)", res.value.logs));
+      .then((res) => console.log("success :)", res.value));
   };
 
   const handleAppendClick = async () => {
@@ -123,7 +123,7 @@ export default function Sidebar() {
     //const signature = await connection.sendTransaction(transaction);
     await connection
       .simulateTransaction(transaction)
-      .then((res) => console.log("success :)", res.value.logs));
+      .then((res) => console.log("success :)", res.value));
   };
 
   const handleReplaceClick = async () => {
@@ -146,7 +146,7 @@ export default function Sidebar() {
     //const signature = await connection.sendTransaction(transaction);
     await connection
       .simulateTransaction(transaction)
-      .then((res) => console.log("success :)", res));
+      .then((res) => console.log("success :)", res.value));
   };
   return (
     <Drawer
