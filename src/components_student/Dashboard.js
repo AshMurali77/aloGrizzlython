@@ -8,8 +8,29 @@ import Sidebar from "./Sidebar";
 
 const drawerWidth = 180;
 const navHeight = 64;
+//store a random 32 byte Uint8Array
+export function generateKeypair() {
+  // Check if the key already exists in local storage
+  let array = null;
+  if (localStorage.getItem("myKey") !== null) {
+    // If the key exists, retrieve the value and convert it to a Uint8Array
+    const storedArray = JSON.parse(localStorage.getItem("myKey"));
+    array = new Uint8Array(storedArray);
+  } else {
+    // If the key does not exist, generate a random 32-byte Uint8Array
+    array = new Uint8Array(32);
+    window.crypto.getRandomValues(array);
 
+    // Store the array in local storage
+    localStorage.setItem("myKey", JSON.stringify(Array.from(array)));
+  }
+
+  // Use the array as needed
+  console.log(array);
+  return array;
+}
 export function Dashboard() {
+  generateKeypair();
   //get screen size
   const windowSize = React.useRef([window.innerWidth, window.innerHeight]);
   return (
