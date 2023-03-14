@@ -14,17 +14,16 @@ const layout = BufferLayout.struct([
 ]);
   //const appendInstructionDiscriminator = 1;
 
-export default function createReplaceInstruction(localPubkey, merklePubkey, merkleTree, leafIndex, newLeaf, proof, programId = programID) {
+export default function createReplaceInstruction(localPubkey, merklePubkey, root, leafIndex, previousLeaf, newLeaf, proof, programId = programID) {
   const data = Buffer.alloc(layout.span);
-  const root = merkleTree.root;
-  console.log(proof);
+  console.log(proof.proof);
   layout.encode(
     {
       instruction: 2,
       root: root,
-      previousLeaf : proof.leaf,
+      previousLeaf : previousLeaf,
       newLeaf : newLeaf,
-      proof: proof,
+      proof: proof.proof,
       index : leafIndex
     },
     data

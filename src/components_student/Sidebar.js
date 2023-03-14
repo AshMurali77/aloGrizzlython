@@ -20,7 +20,17 @@ import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import ArticleIcon from "@mui/icons-material/Article";
 import SchoolIcon from "@mui/icons-material/School";
 import SearchIcon from "@mui/icons-material/Search";
-import { systemProgram, rentSysvar, programID, merkleKeypair, localKeypair, getProof, appendToTree, buildEmptyTree} from "../utils/web3utils";
+import {
+  systemProgram,
+  rentSysvar,
+  programID,
+  merkleKeypair,
+  localKeypair,
+  getProof,
+  appendToTree,
+  buildTree,
+  getLeavesFromFirebase,
+} from "../utils/web3utils";
 import createInitEmptyMerkleTreeInstruction from "../utils/initEmptyMerkleTree.js";
 import createAppendInstruction from "../utils/append";
 import createReplaceInstruction from "../utils/replace";
@@ -81,16 +91,16 @@ export default function Sidebar({ drawerWidth }) {
       lamports: rent,
       space: 31744,
       programId: programID,
-    })
+    });
 
-    let createAccountTransaction = new web3.Transaction().add(
+    /* let createAccountTransaction = new web3.Transaction().add(
       createAccountInstruction
     );
 
     await web3.sendAndConfirmTransaction(connection, createAccountTransaction, [
       localKeypair,
       merkleKeypair,
-    ]);
+    ]); */
 
     let instruction = createInitEmptyMerkleTreeInstruction(
       localKeypair.publicKey,
@@ -98,7 +108,7 @@ export default function Sidebar({ drawerWidth }) {
       systemProgram,
       rentSysvar
     );
-    const instructions = [instruction];
+    const instructions = [createAccountInstruction, instruction];
     const {
       context: { slot: minContextSlot },
       value: { blockhash, lastValidBlockHeight },
@@ -111,13 +121,23 @@ export default function Sidebar({ drawerWidth }) {
     const transaction = new web3.VersionedTransaction(message);
     transaction.sign([localKeypair, merkleKeypair]);
     //const signature = await connection.sendTransaction(transaction);
-    await connection
-      .sendTransaction(transaction)
-      .then((res) => console.log("success :)", res.value));
+    await connection.sendTransaction(transaction);
   };
 
   const handleAppendClick = async () => {
-    let instruction = createAppendInstruction(
+    let appendArray = [];
+    let leaves = await getLeavesFromFirebase("files");
+    leaves.map((leaf) => {
+      console.log(leaf);
+      appendArray.push(
+        createAppendInstruction(
+          localKeypair.publicKey,
+          merkleKeypair.publicKey,
+          leaf
+        )
+      );
+    });
+    /* let instruction = createAppendInstruction(
       localKeypair.publicKey,
       merkleKeypair.publicKey,
       keccak_256.digest(
@@ -127,8 +147,8 @@ export default function Sidebar({ drawerWidth }) {
           Buffer.from(programID.toBase58()),
         ])
       )
-    );
-    const instructions = [instruction];
+    ); */
+    const instructions = appendArray;
     const {
       context: { slot: minContextSlot },
       value: { blockhash, lastValidBlockHeight },
@@ -145,50 +165,53 @@ export default function Sidebar({ drawerWidth }) {
       .simulateTransaction(transaction)
       .then((res) => console.log("success :)", res.value));
     await connection.sendTransaction(transaction);
-    
   };
 
   const handleReplaceClick = async () => {
     //let merkle = new MerkleTree(await getLeavesFromFirebase("files"));
-    let merkle = buildEmptyTree();
+    let merkle = await buildTree();
+    let root = merkle.root;
+    console.log(root);
     let index = 1;
-    let newLeaf = Buffer.from(keccak_256.digest("/*Buffer.concat(/*metadata)*/"));
+    //let newLeaf = Buffer.from(keccak_256.digest("/*Buffer.concat(/*metadata)*/"));
     let leafData = keccak_256.digest(
       Buffer.concat([
         Buffer.from(localKeypair.publicKey.toBase58()),
         Buffer.from(merkleKeypair.publicKey.toBase58()),
         Buffer.from(programID.toBase58()),
       ])
-    )
-    let computeInstruction = web3.ComputeBudgetProgram.setComputeUnitLimit({units: 500000})
+    );
+    //let computeInstruction = web3.ComputeBudgetProgram.setComputeUnitLimit({units: 500000})
 
-    let appendInstruction = createAppendInstruction(
+    /* let appendInstruction = createAppendInstruction(
       localKeypair.publicKey,
       merkleKeypair.publicKey,
       leafData
     );
-
-    console.log(merkle);
-
-    let new_merkle = appendToTree(merkle, leafData);
-    let proof = await getProof(new_merkle, index);
-    console.log(new_merkle);
+ */
+    let previousLeaf = merkle.leaves[index].node;
+    //console.log(previousLeaf);
+    //let new_merkle = appendToTree(merkle, leafData);
+    let proof = getProof(merkle, index);
     console.log(proof.proof);
     let replaceInstruction = createReplaceInstruction(
       localKeypair.publicKey,
       merkleKeypair.publicKey,
-      merkle,
+      merkle.root,
       index,
+      previousLeaf,
       leafData,
-      proof.proof,
-      )
-    const instructions = [computeInstruction, appendInstruction, replaceInstruction];
+      proof
+    );
+    const instructions = [
+      /*computeInstruction, appendInstruction, */ replaceInstruction,
+    ];
 
     /* const {
       context: { slot: minContextSlot },
       value: { blockhash, lastValidBlockHeight },
     } = await connection.getLatestBlockhashAndContext(); */
-    const {blockhash, blockheight} = await connection.getLatestBlockhash();
+    const { blockhash, blockheight } = await connection.getLatestBlockhash();
     const message = new web3.TransactionMessage({
       payerKey: localKeypair.publicKey,
       recentBlockhash: blockhash,
@@ -200,6 +223,7 @@ export default function Sidebar({ drawerWidth }) {
     await connection
       .simulateTransaction(transaction)
       .then((res) => console.log("success :)", res.value));
+    await connection.sendTransaction(transaction);
   };
 
   //Link to support form

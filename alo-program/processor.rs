@@ -78,7 +78,7 @@ pub fn process_instruction (
             let merkle = bytemuck::try_from_bytes_mut::<ConcurrentMerkleTree<14,64>>(&mut merkle_bytes).unwrap();
 
             //if merkle.is_initialized() {
-            merkle.append(tree_address).unwrap();
+            msg!("New Root: {:?}", merkle.append(tree_address).unwrap());
             //msg!("Changelog: {:?}", merkle.get_change_log());
                 //msg!("Rightmost Proof: {:?}", merkle.rightmost_proof);
             /*} else {

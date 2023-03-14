@@ -22,11 +22,10 @@ export const rentSysvar = new web3.PublicKey(
 );
 
 
-/* export async function buildTree () {
+export async function buildTree () {
   let leaf_buffers = await getLeavesFromFirebase("files");
-  console.log(leaf_buffers);
-  return new MerkleTree(leaf_buffers);
-} */
+  return MerkleTree.sparseMerkleTreeFromLeaves(leaf_buffers, 14);
+}
 
 export function buildEmptyTree () {
   let leaves : Buffer[] = []
@@ -42,7 +41,7 @@ export function appendToTree (merkle : MerkleTree, leaf_data : number[]) {
   return merkle;
 }
 
-export async function getProof (merkle : MerkleTree, leafIndex : number) {
+export function getProof (merkle : MerkleTree, leafIndex : number) {
   //let merkle = await buildTree();
   console.log(merkle.getProof(leafIndex));
   return merkle.getProof(leafIndex);
