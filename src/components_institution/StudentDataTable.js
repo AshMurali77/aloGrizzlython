@@ -6,39 +6,8 @@ import { ChangeCircle, NoteAdd, Delete } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 
 export default function StudentDataTable(props) {
-  const handleFileUpload = (e) => {
-    e.preventDefault();
-    uploadFiles(e.target.files[0]);
-  };
-  function CustomFooter() {
-    return (
-      <GridFooterContainer sx={{ justifyContent: "space-between" }}>
-        <Box marginLeft={1}>
-          <Button
-            variant="contained"
-            component="label"
-            endIcon={<NoteAdd />}
-            sx={{ marginRight: 1 }}
-          >
-            Mint Record
-            <input type="file" onChange={(e) => handleFileUpload(e)} hidden />
-          </Button>
-          <Button
-            variant="contained"
-            endIcon={<Delete />}
-            onClick={() => console.log("burning!")}
-          >
-            Burn Record
-          </Button>
-        </Box>
-        <GridFooter
-          sx={{
-            border: "none", // To delete double border.
-          }}
-        />
-      </GridFooterContainer>
-    );
-  }
+  //track selected row
+  const [selected, setSelected] = React.useState([]);
   //drawer width for column sizing
   const drawerWidth = props.drawerWidth;
   //Data table rows
@@ -99,11 +68,48 @@ export default function StudentDataTable(props) {
     return { id, classification, firstName, lastName, credits, major };
   }
 
+  //gets current url path
   let origin =
     useLocation().pathname === "/institution-one"
       ? "students"
       : "institution-two";
 
+  //Upload to firebase storage & sync w web3
+  const handleFileUpload = (e) => {
+    e.preventDefault();
+    uploadFiles(e.target.files[0], origin, selected[0]);
+    uploadFiles(e.target.files[0], "files", selected[0]);
+  };
+  //Custom footer to be rendered with data table
+  function CustomFooter() {
+    return (
+      <GridFooterContainer sx={{ justifyContent: "space-between" }}>
+        <Box marginLeft={1}>
+          <Button
+            variant="contained"
+            component="label"
+            endIcon={<NoteAdd />}
+            sx={{ marginRight: 1 }}
+          >
+            Mint Record
+            <input type="file" onChange={(e) => handleFileUpload(e)} hidden />
+          </Button>
+          <Button
+            variant="contained"
+            endIcon={<Delete />}
+            onClick={() => console.log("burning!")}
+          >
+            Burn Record
+          </Button>
+        </Box>
+        <GridFooter
+          sx={{
+            border: "none", // To delete double border.
+          }}
+        />
+      </GridFooterContainer>
+    );
+  }
   //Loads Row Data from db
   React.useEffect(() => {
     const loadRowData = async () => {
@@ -124,6 +130,20 @@ export default function StudentDataTable(props) {
     };
     loadRowData();
   }, [origin]);
+
+  //handles row selection for data grid
+  const handleRowSelection = async (ids) => {
+    const selectedIDs = new Set(ids);
+    const selectedRowData = rows.filter((row) =>
+      selectedIDs.has(row.id.toString())
+    );
+    setSelected(selectedRowData);
+    console.log("selected:", selected, "rowdata", selectedRowData);
+    //elected(e.selectionModel);
+  };
+  React.useEffect(() => {
+    console.log(selected);
+  }, [selected]);
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <DataGrid
@@ -132,6 +152,9 @@ export default function StudentDataTable(props) {
         pageSize={9}
         rowsPerPageOptions={[9]}
         checkboxSelection
+        onSelectionModelChange={(ids) => {
+          handleRowSelection(ids);
+        }}
         components={{ Footer: CustomFooter }}
       />
     </div>
