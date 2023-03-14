@@ -1,4 +1,4 @@
-Aimport * as React from "react";
+import * as React from "react";
 import { DataGrid, GridFooter, GridFooterContainer } from "@mui/x-data-grid";
 import {
   getStudentData,
@@ -9,7 +9,7 @@ import {
 import { Box, Button } from "@mui/material";
 import { ChangeCircle, NoteAdd, Delete } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
-import { getMetadata, ref} from "@firebase/storage";
+import { getMetadata, ref } from "@firebase/storage";
 import { storage } from "../firebase";
 import {
   merkleKeypair,
@@ -116,9 +116,7 @@ export default function StudentDataTable(props) {
       .simulateTransaction(transaction)
       .then((res) => console.log("success :)", res.value));
     await connection.sendTransaction(transaction);
-
   };
-
 
   //Custom footer to be rendered with data table
   function CustomFooter() {
