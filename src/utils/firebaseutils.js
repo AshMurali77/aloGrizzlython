@@ -6,8 +6,15 @@ import {
   getMetadata,
   updateMetadata,
   uploadBytesResumable,
+  deleteObject,
 } from "firebase/storage";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  setDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
 import { storage, db } from "../firebase";
 import { Buffer } from "buffer";
 import { keccak_256 } from "js-sha3";
@@ -58,6 +65,7 @@ export const createLeaf = async (storageRef) => {
 
 //Upload file to storage
 export const uploadFiles = async (file, origin, student) => {
+  console.log("student", student);
   if (!file) return;
   let folder =
     origin == "students"
@@ -80,6 +88,83 @@ export const uploadFiles = async (file, origin, student) => {
   });
 };
 
+//add student to db/modify if student already exists
+export const addStudentData = (file, origin) => {
+  const reader = new FileReader();
+  let values = {};
+
+  reader.onload = async (e) => {
+    const contents = e.target.result;
+
+    const lines = contents.split("\n").filter((line) => line.trim() !== "");
+
+    for (let i = 0; i < lines.length; i += 2) {
+      const header = lines[i].trim();
+      const value = lines[i + 1].trim();
+
+      switch (header) {
+        case "Institution":
+          values.institution = value;
+          break;
+        case "Classification":
+          values.classification = value;
+          break;
+        case "credits":
+          values.credits = parseInt(value);
+          break;
+        case "First Name":
+          values.firstName = value;
+          break;
+        case "ID":
+          values.id = value;
+          break;
+        case "Last Name":
+          values.lastName = value;
+          break;
+        case "Major":
+          values.major = value;
+          break;
+        default:
+          break;
+      }
+    }
+
+    console.log(values);
+    await setDoc(doc(db, origin, values.id), {
+      Institution: values.institution,
+      classification: values.classification,
+      credits: values.credits,
+      firstName: values.firstName,
+      id: values.id,
+      lastName: values.lastName,
+      major: values.major,
+    });
+  };
+
+  reader.readAsText(file);
+  return values;
+};
+
+//delete student from storage and db
+export const deleteStudent = async (origin, id) => {
+  let storageRef = "";
+  //delete from db
+  await deleteDoc(doc(db, origin, id));
+  //delete from firebase storage
+  const [file_data] = await getFileData(origin);
+  file_data.map(async (file) => {
+    if (id == file.customMetadata.student_id) {
+      storageRef = ref(storage, file.fullPath);
+      await deleteObject(storageRef)
+        .then(() => {
+          console.log("file deleted successfully");
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
+    }
+  });
+};
 //Fetch files from storage
 export const getFileData = async (origin) => {
   let file_data = [];
@@ -90,7 +175,7 @@ export const getFileData = async (origin) => {
     files.items.map(async (item) => {
       const metadata = await getMetadata(item);
       const download = await getDownloadURL(item);
-      metadata.customMetadata = {
+      /*       metadata.customMetadata = {
         leaf: String.fromCharCode(
           ...keccak_256.digest(
             Buffer.concat([
@@ -100,7 +185,7 @@ export const getFileData = async (origin) => {
             ])
           )
         ),
-      };
+      }; */
       //console.log(download);
       file_data.push(metadata);
       download_data.push(download);

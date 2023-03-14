@@ -1,17 +1,30 @@
 import * as React from "react";
 import { DataGrid, GridFooter, GridFooterContainer } from "@mui/x-data-grid";
-import { getStudentData, uploadFiles } from "../utils/firebaseutils";
+import {
+  getStudentData,
+  uploadFiles,
+  addStudentData,
+  deleteStudent,
+} from "../utils/firebaseutils";
 import { Box, Button } from "@mui/material";
 import { ChangeCircle, NoteAdd, Delete } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 
 export default function StudentDataTable(props) {
+  //track upload
+  const [upload, setUpload] = React.useState(0);
   //track selected row
   const [selected, setSelected] = React.useState([]);
   //drawer width for column sizing
   const drawerWidth = props.drawerWidth;
   //Data table rows
   const [rows, setRows] = React.useState([]);
+
+  //gets current url path
+  let origin =
+    useLocation().pathname === "/institution-one"
+      ? "students"
+      : "institution-two";
 
   //Setting column headers
   const columns = [
@@ -35,29 +48,26 @@ export default function StudentDataTable(props) {
         `${params.row.firstName || ""} ${params.row.lastName || ""}`,
     },
     {
-      field: "modifyRecord",
-      headerName: "Modify Record",
+      field: "recordActions",
+      headerName: "Record Actions",
       width: 160,
       sortable: false,
       renderCell: (params) => {
         const onClick = (e) => {
-          const api = params.api;
-          const thisRow = {};
-
-          api
-            .getAllColumns()
-            .filter((c) => c.field !== "__check__" && !!c)
-            .forEach(
-              (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
-            );
-
-          return alert(JSON.stringify(thisRow, null, 4));
+          e.stopPropagation(); // don't select this row after clicking
+          deleteStudent(origin, params.row.id);
+          setUpload(upload + 1);
         };
-
         return (
-          <Button sx={{ width: 160 }} variant="text" onClick={onClick}>
-            <ChangeCircle />
-          </Button>
+          <Box sx={{ justifyContent: "space-between" }}>
+            <Button component="label" variant="text">
+              <ChangeCircle />
+              <input type="file" onChange={(e) => handleFileUpload(e)} hidden />
+            </Button>
+            <Button component="label" variant="text" onClick={onClick}>
+              <Delete />
+            </Button>
+          </Box>
         );
       },
     },
@@ -67,23 +77,19 @@ export default function StudentDataTable(props) {
   function createData(id, classification, firstName, lastName, credits, major) {
     return { id, classification, firstName, lastName, credits, major };
   }
-
-  //gets current url path
-  let origin =
-    useLocation().pathname === "/institution-one"
-      ? "students"
-      : "institution-two";
-
   //Upload to firebase storage & sync w web3
   const handleFileUpload = (e) => {
     e.preventDefault();
-    uploadFiles(e.target.files[0], origin, selected[0]);
-    uploadFiles(e.target.files[0], "files", selected[0]);
+    const student = addStudentData(e.target.files[0], origin);
+    uploadFiles(e.target.files[0], origin, student);
+    uploadFiles(e.target.files[0], "files", student);
+    setUpload(upload + 1);
   };
+
   //Custom footer to be rendered with data table
   function CustomFooter() {
     return (
-      <GridFooterContainer sx={{ justifyContent: "space-between" }}>
+      <GridFooterContainer>
         <Box marginLeft={1}>
           <Button
             variant="contained"
@@ -93,13 +99,6 @@ export default function StudentDataTable(props) {
           >
             Mint Record
             <input type="file" onChange={(e) => handleFileUpload(e)} hidden />
-          </Button>
-          <Button
-            variant="contained"
-            endIcon={<Delete />}
-            onClick={() => console.log("burning!")}
-          >
-            Burn Record
           </Button>
         </Box>
         <GridFooter
@@ -129,7 +128,7 @@ export default function StudentDataTable(props) {
       setRows(newRowData);
     };
     loadRowData();
-  }, [origin]);
+  }, [origin, upload]);
 
   //handles row selection for data grid
   const handleRowSelection = async (ids) => {
