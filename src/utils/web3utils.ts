@@ -1,18 +1,18 @@
 import * as web3 from "@solana/web3.js";
-import os from "os";
+/* import os from "os";
 //import fs from "mz/fs";
 import path from "path";
-import yaml from "yaml";
+import yaml from "yaml"; */
 import { keccak_256 } from "js-sha3";
 import { Buffer } from "buffer";
 import { MerkleTree, MerkleTreeProof } from "@solana/spl-account-compression";
 import { ref, listAll, getMetadata } from "firebase/storage";
 import { storage } from "../firebase";
-
+import { generateKeypair } from "../components_student/Dashboard";
 //web3 program ID, solana program
 const programAddress = "ATHevf1zVM555p1Up8QDHiAC8BMd4gLdZmP4LSfu7XBW";
 export const merkleKeypair = web3.Keypair.generate();
-export const localKeypair = web3.Keypair.generate();
+export const localKeypair = web3.Keypair.fromSeed(generateKeypair());
 export const programID = new web3.PublicKey(programAddress);
 export const systemProgram = new web3.PublicKey(
   "11111111111111111111111111111111"

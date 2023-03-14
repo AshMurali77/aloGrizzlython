@@ -51,7 +51,7 @@ export default function Sidebar({ drawerWidth }) {
   //access row data and load it into the rows
   React.useEffect(() => {
     const airdrop = async () => {
-      console.log("aidropping now");
+      console.log("aidropping now", localKeypair);
       rent = await connection.getMinimumBalanceForRentExemption(31744);
       const airdrop = await connection.requestAirdrop(
         localKeypair.publicKey,
