@@ -26,6 +26,7 @@ import {
   programID,
   merkleKeypair,
   localKeypair,
+  connection,
   getProof,
   appendToTree,
   buildTree,
@@ -38,12 +39,6 @@ import * as web3 from "@solana/web3.js";
 import { MerkleTree, hash } from "@solana/spl-account-compression";
 import { keccak_256 } from "js-sha3";
 
-//establish connection
-const connection = new web3.Connection(
-  //"https://api.devnet.solana.com",
-  "http://127.0.0.1:8899",
-  "confirmed"
-);
 
 let rent = 0;
 

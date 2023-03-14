@@ -9,6 +9,19 @@ import {
 import { Box, Button } from "@mui/material";
 import { ChangeCircle, NoteAdd, Delete } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
+import { getMetadata, ref} from "@firebase/storage";
+import { storage } from "../firebase";
+import {
+  merkleKeypair,
+  localKeypair,
+  connection,
+  getProof,
+  appendToTree,
+  buildTree,
+  getLeavesFromFirebase,
+} from "../utils/web3utils";
+import createAppendInstruction from "../utils/append";
+import * as web3 from "@solana/web3.js";
 
 export default function StudentDataTable(props) {
   //track upload
@@ -78,13 +91,35 @@ export default function StudentDataTable(props) {
     return { id, classification, firstName, lastName, credits, major };
   }
   //Upload to firebase storage & sync w web3
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     e.preventDefault();
     const student = addStudentData(e.target.files[0], origin);
     uploadFiles(e.target.files[0], origin, student);
-    uploadFiles(e.target.files[0], "files", student);
+    let folder = await uploadFiles(e.target.files[0], "files", student);
     setUpload(upload + 1);
+
+    let leaf = await getMetadata(ref(storage, folder));
+    let instruction = createAppendInstruction(
+      localKeypair.publicKey,
+      merkleKeypair.publicKey,
+      leaf
+    );
+    const instructions = [instruction];
+
+    const { blockhash, blockheight } = await connection.getLatestBlockhash();
+    const message = new web3.TransactionMessage({
+      payerKey: localKeypair.publicKey,
+      recentBlockhash: blockhash,
+      instructions,
+    }).compileToV0Message();
+    const transaction = new web3.VersionedTransaction(message);
+    await connection
+      .simulateTransaction(transaction)
+      .then((res) => console.log("success :)", res.value));
+    await connection.sendTransaction(transaction);
+
   };
+
 
   //Custom footer to be rendered with data table
   function CustomFooter() {

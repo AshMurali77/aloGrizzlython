@@ -86,6 +86,7 @@ export const uploadFiles = async (file, origin, student) => {
   uploadTask.then(() => {
     updateFileData(uploadTask.snapshot.metadata.fullPath);
   });
+  return folder;
 };
 
 //add student to db/modify if student already exists

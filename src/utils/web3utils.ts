@@ -10,7 +10,7 @@ import { ref, listAll, getMetadata } from "firebase/storage";
 import { storage } from "../firebase";
 
 //web3 program ID, solana program
-const programAddress = "ATHevf1zVM555p1Up8QDHiAC8BMd4gLdZmP4LSfu7XBW";
+const programAddress = "9AAixeznnJ7kQCxgHQ2dJr5j9S1m8S9dkc1BZRuModBT";
 export const merkleKeypair = web3.Keypair.generate();
 export const localKeypair = web3.Keypair.generate();
 export const programID = new web3.PublicKey(programAddress);
@@ -19,6 +19,13 @@ export const systemProgram = new web3.PublicKey(
 );
 export const rentSysvar = new web3.PublicKey(
   "SysvarRent111111111111111111111111111111111"
+);
+
+//establish connection
+export const connection = new web3.Connection(
+  //"https://api.devnet.solana.com",
+  "http://127.0.0.1:8899",
+  "confirmed"
 );
 
 export async function buildTree() {
@@ -101,9 +108,10 @@ export function hashv(...pubkeys: web3.PublicKey): Buffer {
 
 //gets all leaf metadata and parse it into an array of buffers
 export const getLeavesFromFirebase = async (origin: string) => {
-  let leaf_data: Buffer[] = [];
   const storageRef = ref(storage, `${origin}/`);
   const files = await listAll(storageRef);
+  console.log(files);
+  let leaf_data: Buffer[] = [];
   await Promise.all(
     files.items.map(async (item) => {
       const metadata = await getMetadata(item);
@@ -116,10 +124,11 @@ export const getLeavesFromFirebase = async (origin: string) => {
           "leaf buffer",
           Buffer.from(metadata.customMetadata.leaf, "ascii")
         );
-        leaf_data.push(Buffer.from(metadata.customMetadata.leaf, "ascii"));
+        leaf_data[parseInt(metadata.customMetadata.index)] = Buffer.from(metadata.customMetadata.leaf, "ascii");
       }
     })
   );
   console.log("leaf data", leaf_data);
   return leaf_data;
 };
+
