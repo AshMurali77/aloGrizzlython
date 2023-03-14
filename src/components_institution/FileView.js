@@ -124,8 +124,8 @@ export default function FileView(props) {
   const handleTransferFile = (e, docID) => {
     //requestToken(docID);
     updateFileData(selected.fullPath);
-    getFileData("files");
-    getLeavesFromFirebase("files");
+    getFileData("students");
+    getLeavesFromFirebase("students");
   };
 
   return (

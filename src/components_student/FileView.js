@@ -26,7 +26,11 @@ import SendIcon from "@mui/icons-material/Send";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Task } from "@mui/icons-material";
 //Util function imports
-import { getFileData, updateFileData } from "../utils/firebaseutils";
+import {
+  getFileData,
+  getStudentFileData,
+  updateFileData,
+} from "../utils/firebaseutils";
 import { getLeavesFromFirebase } from "../utils/web3utils";
 import { requestToken } from "../utils/authToken";
 //Column Headers and Formatting
@@ -70,6 +74,9 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
 );
 
 export default function FileView(props) {
+  //Edit for different student views
+  const studentID = "st99887";
+
   const navHeight = props.navHeight;
   const fileScrollHeight = props.windowHeight - navHeight;
 
@@ -82,7 +89,7 @@ export default function FileView(props) {
   //access row data and load it into the rows
   React.useEffect(() => {
     const loadRowData = async () => {
-      const [fileData, downloadData] = await getFileData("files");
+      const [fileData, downloadData] = await getStudentFileData(studentID);
       const newRowData = fileData.map((data, index) => {
         return createData(
           downloadData[index],
@@ -120,8 +127,8 @@ export default function FileView(props) {
   const handleTransferFile = (e, docID) => {
     //requestToken(docID);
     updateFileData(selected.fullPath);
-    getFileData("files");
-    getLeavesFromFirebase("files");
+    getFileData("students");
+    getLeavesFromFirebase("students");
   };
 
   return (

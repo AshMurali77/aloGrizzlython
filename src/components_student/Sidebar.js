@@ -126,7 +126,7 @@ export default function Sidebar({ drawerWidth }) {
 
   const handleAppendClick = async () => {
     let appendArray = [];
-    let leaves = await getLeavesFromFirebase("files");
+    let leaves = await getLeavesFromFirebase("students");
     leaves.map((leaf) => {
       console.log(leaf);
       appendArray.push(
@@ -168,7 +168,7 @@ export default function Sidebar({ drawerWidth }) {
   };
 
   const handleReplaceClick = async () => {
-    //let merkle = new MerkleTree(await getLeavesFromFirebase("files"));
+    //let merkle = new MerkleTree(await getLeavesFromFirebase("students"));
     let merkle = await buildTree();
     let root = merkle.root;
     console.log(root);

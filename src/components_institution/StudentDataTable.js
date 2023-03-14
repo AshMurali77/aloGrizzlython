@@ -82,7 +82,6 @@ export default function StudentDataTable(props) {
     e.preventDefault();
     const student = addStudentData(e.target.files[0], origin);
     uploadFiles(e.target.files[0], origin, student);
-    uploadFiles(e.target.files[0], "files", student);
     setUpload(upload + 1);
   };
 

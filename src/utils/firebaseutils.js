@@ -195,6 +195,25 @@ export const getFileData = async (origin) => {
   return [file_data, download_data];
 };
 
+//Fetch a specific student's files form storage
+export const getStudentFileData = async (id) => {
+  let file_data = [];
+  let download_data = [];
+  const storageRef = ref(storage, `students/`);
+  const files = await listAll(storageRef);
+  await Promise.all(
+    files.items.map(async (item) => {
+      const metadata = await getMetadata(item);
+      const download = await getDownloadURL(item);
+      if (metadata.customMetadata.student_id == id) {
+        file_data.push(metadata);
+        download_data.push(download);
+      }
+    })
+  );
+  console.log("file data", file_data);
+  return [file_data, download_data];
+};
 //Update custom metadata
 export const updateFileData = async (path) => {
   let newMetadata = {};
