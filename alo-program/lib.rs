@@ -3,7 +3,7 @@ pub mod processor;
 pub mod instruction;
 //pub mod state;
 
-solana_program::declare_id!("ATHevf1zVM555p1Up8QDHiAC8BMd4gLdZmP4LSfu7XBW");
+solana_program::declare_id!("8k21KcNP8yg1d3NEwouzeiziYeVxZ39GtTAXsDo9wWed");
 
 
 #[cfg(test)]

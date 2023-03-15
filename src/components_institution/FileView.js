@@ -24,6 +24,7 @@ import { styled, useTheme } from "@mui/material/styles";
 //material icon imports
 import SendIcon from "@mui/icons-material/Send";
 import DownloadIcon from "@mui/icons-material/Download";
+import { Task } from "@mui/icons-material";
 //Util function imports
 import { getFileData, updateFileData } from "../utils/firebaseutils";
 import { getLeavesFromFirebase } from "../utils/web3utils";
@@ -239,27 +240,39 @@ export default function FileView(props) {
               marginTop: "4.3%",
               marginRight: "2%",
               position: "absolute",
+              bgcolor: "#F2F6FC",
             },
           }}
           variant={"persistent"}
           anchor={"right"}
           open={selected}
         >
-          <Box height={navHeight}></Box>
+          <Box
+            fontSize={18}
+            height={navHeight}
+            display={"inline-flex"}
+            alignItems={"center"}
+            justifyContent={"center"}
+          >
+            <Task fontSize="inherit" />
+            <Typography color={"#000"}>
+              {selected && selected.filename}
+            </Typography>
+          </Box>{" "}
           <Box mx={"auto"} justifyContent={"center"} alignItems={"center"}>
             {selected ? (
               <>
                 <Stack spacing={2}>
                   <Stack>
-                    <Typography>File Name</Typography>
+                    <Typography fontSize={14}>File Name</Typography>
                     <Typography color={"#000"}>{selected.filename}</Typography>
                   </Stack>
                   <Stack>
-                    <Typography>File Size</Typography>
+                    <Typography fontSize={14}>File Size</Typography>
                     <Typography color={"#000"}>{selected.filesize}</Typography>
                   </Stack>
                   <Stack>
-                    <Typography>Access Date</Typography>
+                    <Typography fontSize={14}>Access Date</Typography>
                     <Typography color={"#000"}>
                       {selected.accessdate}
                     </Typography>
@@ -276,14 +289,6 @@ export default function FileView(props) {
                     endIcon={<DownloadIcon />}
                   >
                     Download File
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={(e) => handleTransferFile(e, selected.link)}
-                    endIcon={<SendIcon />}
-                    sx={{ marginLeft: "5%", marginRight: "5%" }}
-                  >
-                    Transfer File
                   </Button>
                 </Stack>
               </>

@@ -8,9 +8,13 @@ import {
   Drawer,
   IconButton,
   InputAdornment,
+  FormControl,
+  Select,
   Link,
   Paper,
   Stack,
+  InputLabel,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -85,6 +89,12 @@ export default function FileView(props) {
   const [filteredRows, setFilteredRows] = React.useState([]);
   //for file selection and drawer opening
   const [selected, setSelected] = React.useState();
+
+  const [institution, setInstitution] = React.useState("");
+
+  const handleChange = (event) => {
+    setInstitution(event.target.value);
+  };
 
   //access row data and load it into the rows
   React.useEffect(() => {
@@ -215,7 +225,7 @@ export default function FileView(props) {
                         <TableCell component="th" id={labelId} scope="row">
                           {row.filename}
                         </TableCell>
-                        <TableCell>{row.filesize}</TableCell>
+                        <TableCell>{row.filesize} Bytes</TableCell>
                         <TableCell>{row.accessdate}</TableCell>
                       </TableRow>
                     );
@@ -242,6 +252,7 @@ export default function FileView(props) {
               marginTop: "4.4%",
               marginRight: "2%",
               position: "absolute",
+              bgcolor: "#F2F6FC",
             },
           }}
           variant={"persistent"}
@@ -269,7 +280,6 @@ export default function FileView(props) {
             justifyContent={"center"}
             display={"flex"}
             mx={"auto"}
-            bgcolor={"#F2F6FC"}
           >
             {selected ? (
               <>
@@ -281,15 +291,17 @@ export default function FileView(props) {
                     <Typography color={"#000"}>{selected.filename}</Typography>
                   </Stack>
                   <Stack>
-                    <Typography>Size</Typography>
-                    <Typography color={"#000"}>{selected.filesize}</Typography>
+                    <Typography color={"#000"} fontSize={14}>
+                      Size
+                    </Typography>
+                    <Typography color={"#000"}>
+                      {selected.filesize} Bytes
+                    </Typography>
                   </Stack>
                   <Stack>
-                    <Typography>Type</Typography>
-                    <Typography color={"#000"}>application/pdf</Typography>
-                  </Stack>
-                  <Stack>
-                    <Typography>Access Date</Typography>
+                    <Typography color={"#000"} fontSize={14}>
+                      Access Date
+                    </Typography>
                     <Typography color={"#000"}>
                       {selected.accessdate}
                     </Typography>
@@ -307,14 +319,34 @@ export default function FileView(props) {
                   >
                     Download File
                   </Button>
-                  <Button
-                    variant="contained"
-                    onClick={(e) => handleTransferFile(e, selected.link)}
-                    endIcon={<SendIcon />}
-                    sx={{ marginLeft: "5%", marginRight: "5%" }}
-                  >
-                    Transfer File
-                  </Button>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="demo-simple-select-label">
+                      Institution
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      value={institution}
+                      label="Receiving Institution"
+                      onChange={handleChange}
+                    >
+                      <MenuItem value={"institution-two"}>
+                        Institution Two
+                      </MenuItem>
+                    </Select>
+                    <Button
+                      variant="contained"
+                      onClick={(e) => handleTransferFile(e, selected.link)}
+                      endIcon={<SendIcon />}
+                      sx={{
+                        marginTop: "3%",
+                        marginLeft: "5%",
+                        marginRight: "5%",
+                      }}
+                    >
+                      Transfer File
+                    </Button>
+                  </FormControl>
                 </Stack>
               </>
             ) : (

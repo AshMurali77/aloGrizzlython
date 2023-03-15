@@ -10,7 +10,7 @@ import { ref, listAll, getMetadata } from "firebase/storage";
 import { storage } from "../firebase";
 import { generateKeypair } from "../components_student/Dashboard";
 //web3 program ID, solana program
-const programAddress = "ATHevf1zVM555p1Up8QDHiAC8BMd4gLdZmP4LSfu7XBW";
+const programAddress = "8k21KcNP8yg1d3NEwouzeiziYeVxZ39GtTAXsDo9wWed";
 export const merkleKeypairOne = web3.Keypair.fromSeed(
   generateKeypair("merkleKeypairOne")
 );

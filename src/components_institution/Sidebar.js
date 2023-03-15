@@ -41,6 +41,13 @@ export default function Sidebar(props) {
 
   const handleInitClick = async () => {
     //const localKeypair = await getPayer();
+    console.log("aidropping now", localKeypair);
+    rent = await connection.getMinimumBalanceForRentExemption(31744);
+    const airdrop = await connection.requestAirdrop(
+      localKeypair.publicKey,
+      rent + 1 * web3.LAMPORTS_PER_SOL
+    );
+    console.log(airdrop);
     console.log("init rent", rent);
     await connection
       .getBalance(localKeypair.publicKey)
