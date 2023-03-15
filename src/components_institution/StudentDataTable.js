@@ -13,7 +13,8 @@ import { useLocation } from "react-router-dom";
 import { getMetadata, ref } from "@firebase/storage";
 import { storage } from "../firebase";
 import {
-  merkleKeypair,
+  merkleKeypairOne,
+  merkleKeypairTwo,
   localKeypair,
   connection,
   getProof,
@@ -27,6 +28,11 @@ import createReplaceInstruction from "../utils/replace";
 import * as web3 from "@solana/web3.js";
 
 export default function StudentDataTable(props) {
+  const location = useLocation().pathname;
+  const merkleKeypair =
+    location == "institution-one" || location == "student"
+      ? merkleKeypairOne
+      : merkleKeypairTwo;
   //track upload
   const [upload, setUpload] = React.useState(0);
   //track selected row
@@ -94,7 +100,7 @@ export default function StudentDataTable(props) {
 
           const instructions = [replaceInstruction];
 
-          let transaction = await buildTransaction(instructions);
+          let transaction = await buildTransaction(instructions, location);
 
           await connection
             .simulateTransaction(transaction)
@@ -131,7 +137,7 @@ export default function StudentDataTable(props) {
     let folder = await uploadFiles(e.target.files[0], origin, student);
     setUpload(upload + 1);
 
-    let uploadedFileRef = ref(storage, `${folder}/${e.target.files[0].name}`)
+    let uploadedFileRef = ref(storage, `${folder}/${e.target.files[0].name}`);
     setTimeout(async () => {
       let fileMeta = await getMetadata(uploadedFileRef);
       let leaf = Buffer.from(fileMeta.customMetadata.leaf, "ascii");
@@ -141,8 +147,8 @@ export default function StudentDataTable(props) {
         leaf
       );
       const instructions = [instruction];
-  
-      let transaction = await buildTransaction(instructions);
+
+      let transaction = await buildTransaction(instructions, location);
       await connection
         .simulateTransaction(transaction)
         .then((res) => console.log("success :)", res.value));

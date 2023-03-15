@@ -1,49 +1,44 @@
 import * as React from "react";
 // MUI Component Imports
-import { blue } from "@mui/material/colors";
 import {
   Box,
+  Button,
   Divider,
   Drawer,
-  Typography,
   List,
   ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Toolbar,
-  Button,
+  Typography,
 } from "@mui/material/";
 // MUI Icon Imports
 import { Assessment } from "@mui/icons-material";
-import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import ArticleIcon from "@mui/icons-material/Article";
-import SchoolIcon from "@mui/icons-material/School";
+import ContactSupportIcon from "@mui/icons-material/ContactSupport";
 import SearchIcon from "@mui/icons-material/Search";
-import {
-  systemProgram,
-  rentSysvar,
-  programID,
-  merkleKeypair,
-  localKeypair,
-  connection,
-  getProof,
-  buildTransaction,
-  appendToTree,
-  buildTree,
-  getLeavesFromFirebase,
-} from "../utils/web3utils";
-import createInitEmptyMerkleTreeInstruction from "../utils/initEmptyMerkleTree.js";
+import * as web3 from "@solana/web3.js";
+import { keccak_256 } from "js-sha3";
+import { useLocation } from "react-router-dom";
 import createAppendInstruction from "../utils/append";
 import createReplaceInstruction from "../utils/replace";
-import * as web3 from "@solana/web3.js";
-import { MerkleTree, hash } from "@solana/spl-account-compression";
-import { keccak_256 } from "js-sha3";
-
-
+import {
+  buildTransaction,
+  buildTree,
+  connection,
+  getLeavesFromFirebase,
+  getProof,
+  localKeypair,
+  merkleKeypairOne,
+  merkleKeypairTwo,
+  programID,
+} from "../utils/web3utils";
 let rent = 0;
 
 export default function Sidebar({ drawerWidth }) {
+  const location = useLocation().pathname;
+  const merkleKeypair =
+    location == "institution-one" || location == "student"
+      ? merkleKeypairOne
+      : merkleKeypairTwo;
   //access row data and load it into the rows
   React.useEffect(() => {
     const airdrop = async () => {
@@ -58,58 +53,6 @@ export default function Sidebar({ drawerWidth }) {
     airdrop();
   }, []);
 
-  const handleInitClick = async () => {
-    //const localKeypair = await getPayer();
-    console.log("init rent", rent);
-    await connection
-      .getBalance(localKeypair.publicKey)
-      .then((balance) =>
-        console.log(
-          "signature",
-          "::",
-          localKeypair.publicKey.toBase58(),
-          "balance: ",
-          balance
-        )
-      );
-    console.log(
-      "connection",
-      connection,
-      "wallet",
-      localKeypair.publicKey.toBase58(),
-      "merkle",
-      merkleKeypair.publicKey.toBase58()
-    );
-
-    let createAccountInstruction = web3.SystemProgram.createAccount({
-      fromPubkey: localKeypair.publicKey,
-      newAccountPubkey: merkleKeypair.publicKey,
-      lamports: rent,
-      space: 31744,
-      programId: programID,
-    });
-
-    /* let createAccountTransaction = new web3.Transaction().add(
-      createAccountInstruction
-    );
-
-    await web3.sendAndConfirmTransaction(connection, createAccountTransaction, [
-      localKeypair,
-      merkleKeypair,
-    ]); */
-
-    let instruction = createInitEmptyMerkleTreeInstruction(
-      localKeypair.publicKey,
-      merkleKeypair.publicKey,
-      systemProgram,
-      rentSysvar
-    );
-    const instructions = [createAccountInstruction, instruction];
-    let transaction = await buildTransaction(instructions);
-    //const signature = await connection.sendTransaction(transaction);
-    await connection.sendTransaction(transaction);
-  };
-
   const handleAppendClick = async () => {
     let appendArray = [];
     let leaves = await getLeavesFromFirebase("students");
@@ -123,9 +66,9 @@ export default function Sidebar({ drawerWidth }) {
         )
       );
     });
-    
+
     const instructions = appendArray;
-    let transaction = await buildTransaction(instructions);
+    let transaction = await buildTransaction(instructions, location);
     await connection
       .simulateTransaction(transaction)
       .then((res) => console.log("success :)", res.value));
@@ -176,7 +119,7 @@ export default function Sidebar({ drawerWidth }) {
       context: { slot: minContextSlot },
       value: { blockhash, lastValidBlockHeight },
     } = await connection.getLatestBlockhashAndContext(); */
-    let transaction = await buildTransaction(instructions);
+    let transaction = await buildTransaction(instructions, location);
     //const signature = await connection.sendTransaction(transaction);
     await connection
       .simulateTransaction(transaction)
@@ -219,15 +162,6 @@ export default function Sidebar({ drawerWidth }) {
           <ListItem>
             <Button color="inherit" startIcon={<ArticleIcon />}>
               Documents
-            </Button>
-          </ListItem>
-          <ListItem>
-            <Button
-              color="inherit"
-              onClick={handleInitClick}
-              startIcon={<SchoolIcon />}
-            >
-              InitTree
             </Button>
           </ListItem>
           <ListItem>

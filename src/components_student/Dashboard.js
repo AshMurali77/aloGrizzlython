@@ -9,12 +9,12 @@ import Sidebar from "./Sidebar";
 const drawerWidth = 180;
 const navHeight = 64;
 //store a random 32 byte Uint8Array
-export function generateKeypair() {
+export function generateKeypair(name) {
   // Check if the key already exists in local storage
   let array = null;
-  if (localStorage.getItem("myKey") !== null) {
+  if (localStorage.getItem(name) !== null) {
     // If the key exists, retrieve the value and convert it to a Uint8Array
-    const storedArray = JSON.parse(localStorage.getItem("myKey"));
+    const storedArray = JSON.parse(localStorage.getItem(name));
     array = new Uint8Array(storedArray);
   } else {
     // If the key does not exist, generate a random 32-byte Uint8Array
@@ -22,7 +22,7 @@ export function generateKeypair() {
     window.crypto.getRandomValues(array);
 
     // Store the array in local storage
-    localStorage.setItem("myKey", JSON.stringify(Array.from(array)));
+    localStorage.setItem(name, JSON.stringify(Array.from(array)));
   }
 
   // Use the array as needed

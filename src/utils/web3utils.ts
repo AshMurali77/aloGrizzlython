@@ -10,9 +10,14 @@ import { ref, listAll, getMetadata } from "firebase/storage";
 import { storage } from "../firebase";
 import { generateKeypair } from "../components_student/Dashboard";
 //web3 program ID, solana program
-const programAddress = "9AAixeznnJ7kQCxgHQ2dJr5j9S1m8S9dkc1BZRuModBT";
-export const merkleKeypair = web3.Keypair.generate();
-export const localKeypair = web3.Keypair.fromSeed(generateKeypair());
+const programAddress = "ATHevf1zVM555p1Up8QDHiAC8BMd4gLdZmP4LSfu7XBW";
+export const merkleKeypairOne = web3.Keypair.fromSeed(
+  generateKeypair("merkleKeypairOne")
+);
+export const merkleKeypairTwo = web3.Keypair.fromSeed(
+  generateKeypair("merkleKeypairTwo")
+);
+export const localKeypair = web3.Keypair.fromSeed(generateKeypair("myKey"));
 export const programID = new web3.PublicKey(programAddress);
 export const systemProgram = new web3.PublicKey(
   "11111111111111111111111111111111"
@@ -42,7 +47,11 @@ export function buildEmptyTree() {
   return MerkleTree.sparseMerkleTreeFromLeaves(leaves, 14);
 }
 
-export function appendToTree(merkle: MerkleTree, leaf_data: number[], index : number) {
+export function appendToTree(
+  merkle: MerkleTree,
+  leaf_data: number[],
+  index: number
+) {
   merkle.updateLeaf(index, Buffer.from(leaf_data));
   return merkle;
 }
@@ -53,9 +62,16 @@ export function getProof(merkle: MerkleTree, leafIndex: number) {
   return merkle.getProof(leafIndex);
 }
 
-export async function buildTransaction(instructions : web3.TransactionInstruction[]) {
-
-  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+export async function buildTransaction(
+  instructions: web3.TransactionInstruction[],
+  location: string
+) {
+  const merkleKeypair =
+    location == "institution-one" || location == "student"
+      ? merkleKeypairOne
+      : merkleKeypairTwo;
+  const { blockhash, lastValidBlockHeight } =
+    await connection.getLatestBlockhash();
 
   const message = new web3.TransactionMessage({
     payerKey: localKeypair.publicKey,
@@ -65,7 +81,7 @@ export async function buildTransaction(instructions : web3.TransactionInstructio
   const transaction = new web3.VersionedTransaction(message);
   transaction.sign([localKeypair, merkleKeypair]);
   //const signature = await connection.sendTransaction(transaction);
-  
+
   return transaction;
 }
 
@@ -140,11 +156,13 @@ export const getLeavesFromFirebase = async (origin: string) => {
           "leaf buffer",
           Buffer.from(metadata.customMetadata.leaf, "ascii")
         );
-        leaf_data[parseInt(metadata.customMetadata.index)] = Buffer.from(metadata.customMetadata.leaf, "ascii");
+        leaf_data[parseInt(metadata.customMetadata.index)] = Buffer.from(
+          metadata.customMetadata.leaf,
+          "ascii"
+        );
       }
     })
   );
   console.log("leaf data", leaf_data);
   return leaf_data;
 };
-

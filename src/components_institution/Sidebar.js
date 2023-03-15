@@ -1,4 +1,3 @@
-import * as React from "react";
 // MUI Component Imports
 import {
   Box,
@@ -7,18 +6,88 @@ import {
   Drawer,
   List,
   ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Toolbar,
   Typography,
 } from "@mui/material/";
+// MUI Component Imports
 // MUI Icon Imports
+import { Assessment, ContactSupport } from "@mui/icons-material";
 import ArticleIcon from "@mui/icons-material/Article";
 import SchoolIcon from "@mui/icons-material/School";
-import { Assessment, ContactSupport } from "@mui/icons-material";
+import * as web3 from "@solana/web3.js";
+import { useLocation } from "react-router-dom";
+import createInitEmptyMerkleTreeInstruction from "../utils/initEmptyMerkleTree.js";
+import {
+  buildTransaction,
+  connection,
+  localKeypair,
+  merkleKeypairOne,
+  merkleKeypairTwo,
+  programID,
+  rentSysvar,
+  systemProgram,
+} from "../utils/web3utils";
+
+let rent = 0;
 
 export default function Sidebar(props) {
+  const location = useLocation().pathname;
+  const merkleKeypair =
+    location == "institution-one" || location == "student"
+      ? merkleKeypairOne
+      : merkleKeypairTwo;
+
+  const handleInitClick = async () => {
+    //const localKeypair = await getPayer();
+    console.log("init rent", rent);
+    await connection
+      .getBalance(localKeypair.publicKey)
+      .then((balance) =>
+        console.log(
+          "signature",
+          "::",
+          localKeypair.publicKey.toBase58(),
+          "balance: ",
+          balance
+        )
+      );
+    console.log(
+      "connection",
+      connection,
+      "wallet",
+      localKeypair.publicKey.toBase58(),
+      "merkle",
+      merkleKeypair.publicKey.toBase58()
+    );
+
+    let createAccountInstruction = web3.SystemProgram.createAccount({
+      fromPubkey: localKeypair.publicKey,
+      newAccountPubkey: merkleKeypair.publicKey,
+      lamports: rent,
+      space: 31744,
+      programId: programID,
+    });
+
+    /* let createAccountTransaction = new web3.Transaction().add(
+      createAccountInstruction
+    );
+
+    await web3.sendAndConfirmTransaction(connection, createAccountTransaction, [
+      localKeypair,
+      merkleKeypair,
+    ]); */
+
+    let instruction = createInitEmptyMerkleTreeInstruction(
+      localKeypair.publicKey,
+      merkleKeypair.publicKey,
+      systemProgram,
+      rentSysvar
+    );
+    const instructions = [createAccountInstruction, instruction];
+    let transaction = await buildTransaction(instructions, location);
+    //const signature = await connection.sendTransaction(transaction);
+    await connection.sendTransaction(transaction);
+  };
   const drawerWidth = props.drawerWidth;
   const handleSupportClick = () => {};
   return (
@@ -66,6 +135,15 @@ export default function Sidebar(props) {
               startIcon={<SchoolIcon />}
             >
               Records
+            </Button>
+          </ListItem>
+          <ListItem>
+            <Button
+              color="inherit"
+              onClick={handleInitClick}
+              startIcon={<SchoolIcon />}
+            >
+              InitTree
             </Button>
           </ListItem>
         </List>

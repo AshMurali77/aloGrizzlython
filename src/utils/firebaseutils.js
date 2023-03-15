@@ -18,7 +18,7 @@ import {
 import { storage, db } from "../firebase";
 import { Buffer } from "buffer";
 import { keccak_256 } from "js-sha3";
-import { merkleKeypair, localKeypair } from "./web3utils";
+import { merkleKeypairOne, merkleKeypairTwo, localKeypair } from "./web3utils";
 
 //Fetch relevant metadata for a file
 export const getFileMetadata = async (storageRef) => {
@@ -54,7 +54,7 @@ export const createLeaf = async (storageRef) => {
     ...keccak_256.digest(
       Buffer.concat([
         Buffer.from(data_hash),
-        Buffer.from(merkleKeypair.publicKey.toBase58()),
+        Buffer.from(merkleKeypairOne.publicKey.toBase58()),
         Buffer.from(localKeypair.publicKey.toBase58()),
         //Add student keypair
       ])
