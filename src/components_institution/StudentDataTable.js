@@ -5,6 +5,7 @@ import {
   uploadFiles,
   addStudentData,
   deleteStudent,
+  replaceFile,
 } from "../utils/firebaseutils";
 import { Box, Button } from "@mui/material";
 import { ChangeCircle, NoteAdd, Delete } from "@mui/icons-material";
@@ -77,7 +78,7 @@ export default function StudentDataTable(props) {
           let merkle = await buildTree();
           let proof = getProof(merkle, index);
           let index = 0; //getMetadata(origin).customMetadata.index
-          let leafData = Buffer.alloc(32, 0)
+          let leafData = Buffer.alloc(32, 0);
 
           let previousLeaf = merkle.leaves[index].node;
 
@@ -90,21 +91,25 @@ export default function StudentDataTable(props) {
             leafData,
             proof
           );
-          
+
           const instructions = [replaceInstruction];
 
           let transaction = await buildTransaction(instructions);
 
-          await connection.simulateTransaction(transaction).then((res) => console.log("success :)", res.value));
+          await connection
+            .simulateTransaction(transaction)
+            .then((res) => console.log("success :)", res.value));
           await connection.sendTransaction(transaction);
-
-
         };
         return (
           <Box sx={{ justifyContent: "space-between" }}>
             <Button component="label" variant="text">
               <ChangeCircle />
-              <input type="file" onChange={(e) => handleFileUpload(e)} hidden />
+              <input
+                type="file"
+                onChange={(e) => handleFileReplace(e)}
+                hidden
+              />
             </Button>
             <Button component="label" variant="text" onClick={onClick}>
               <Delete />
@@ -139,6 +144,14 @@ export default function StudentDataTable(props) {
       .simulateTransaction(transaction)
       .then((res) => console.log("success :)", res.value));
     await connection.sendTransaction(transaction);
+  };
+
+  //Replace file in firebase storage & sync w web3
+  const handleFileReplace = async (e) => {
+    e.preventDefault();
+    const student = addStudentData(e.target.files[0], origin);
+    await replaceFile(e.target.files[0], origin, student);
+    setUpload(upload + 1);
   };
 
   //Custom footer to be rendered with data table

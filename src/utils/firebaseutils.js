@@ -89,6 +89,27 @@ export const uploadFiles = async (file, origin, student, index) => {
   return folder;
 };
 
+//replace student in storage
+export const replaceFile = async (replacementFile, origin, student) => {
+  let storageRef = "";
+  let folder = origin == "students" ? "students" : "institution-two";
+  const [file_data] = await getFileData(origin);
+  file_data.map(async (file) => {
+    if (student.id == file.customMetadata.student_id) {
+      const index = file.customMetadata.index;
+      await uploadFiles(replacementFile, folder, student, index);
+      storageRef = ref(storage, file.fullPath);
+      await deleteObject(storageRef)
+        .then(() => {
+          console.log("file deleted successfully");
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
+    }
+  });
+};
+
 //add student to db/modify if student already exists
 export const addStudentData = (file, origin) => {
   const reader = new FileReader();
@@ -169,6 +190,7 @@ export const deleteStudent = async (origin, id) => {
     }
   });
 };
+
 //Fetch files from storage
 export const getFileData = async (origin) => {
   let file_data = [];
@@ -220,6 +242,7 @@ export const getStudentFileData = async (id) => {
   console.log("file data", file_data);
   return [file_data, download_data];
 };
+
 //Update custom metadata
 export const updateFileData = async (path) => {
   let newMetadata = {};
