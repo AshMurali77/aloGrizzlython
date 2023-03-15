@@ -29,6 +29,8 @@ import {
   localKeypair,
   merkleKeypairOne,
   merkleKeypairTwo,
+  institutionOneKeypair,
+  institutionTwoKeypair,
   programID,
 } from "../utils/web3utils";
 let rent = 0;

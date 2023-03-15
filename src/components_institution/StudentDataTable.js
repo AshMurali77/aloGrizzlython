@@ -1,31 +1,30 @@
-import * as React from "react";
+import { getMetadata, ref } from "@firebase/storage";
+import { ChangeCircle, Delete, NoteAdd } from "@mui/icons-material";
+import { Box, Button } from "@mui/material";
 import { DataGrid, GridFooter, GridFooterContainer } from "@mui/x-data-grid";
+import * as React from "react";
+import { useLocation } from "react-router-dom";
+import { storage } from "../firebase";
+import createAppendInstruction from "../utils/append";
 import {
-  getStudentData,
-  uploadFiles,
   addStudentData,
   deleteStudent,
+  getStudentData,
   replaceFile,
+  uploadFiles,
 } from "../utils/firebaseutils";
-import { Box, Button } from "@mui/material";
-import { ChangeCircle, NoteAdd, Delete } from "@mui/icons-material";
-import { useLocation } from "react-router-dom";
-import { getMetadata, ref } from "@firebase/storage";
-import { storage } from "../firebase";
+import createReplaceInstruction from "../utils/replace";
 import {
-  merkleKeypairOne,
-  merkleKeypairTwo,
-  localKeypair,
+  buildTransaction,
+  buildTree,
   connection,
   getProof,
-  appendToTree,
-  buildTree,
-  getLeavesFromFirebase,
-  buildTransaction,
+  localKeypair,
+  merkleKeypairOne,
+  merkleKeypairTwo,
+  institutionOneKeypair,
+  institutionTwoKeypair,
 } from "../utils/web3utils";
-import createAppendInstruction from "../utils/append";
-import createReplaceInstruction from "../utils/replace";
-import * as web3 from "@solana/web3.js";
 
 export default function StudentDataTable(props) {
   const location = useLocation().pathname;

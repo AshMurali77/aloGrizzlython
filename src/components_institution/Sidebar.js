@@ -23,6 +23,8 @@ import {
   localKeypair,
   merkleKeypairOne,
   merkleKeypairTwo,
+  institutionOneKeypair,
+  institutionTwoKeypair,
   programID,
   rentSysvar,
   systemProgram,

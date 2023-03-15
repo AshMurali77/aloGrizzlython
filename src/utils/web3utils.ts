@@ -18,6 +18,12 @@ export const merkleKeypairTwo = web3.Keypair.fromSeed(
   generateKeypair("merkleKeypairTwo")
 );
 export const localKeypair = web3.Keypair.fromSeed(generateKeypair("myKey"));
+export const institutionOneKeypair = web3.Keypair.fromSeed(
+  generateKeypair("institutionOne")
+);
+export const institutionTwoKeypair = web3.Keypair.fromSeed(
+  generateKeypair("institutionTwo")
+);
 export const programID = new web3.PublicKey(programAddress);
 export const systemProgram = new web3.PublicKey(
   "11111111111111111111111111111111"
