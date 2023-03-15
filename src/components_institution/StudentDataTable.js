@@ -75,8 +75,8 @@ export default function StudentDataTable(props) {
           setUpload(upload + 1);
 
           let merkle = await buildTree();
-          let proof = getProof(merkle, index);
           let index = 0; //getMetadata(origin).customMetadata.index
+          let proof = getProof(merkle, index);
           let leafData = Buffer.alloc(32, 0)
 
           let previousLeaf = merkle.leaves[index].node;
@@ -126,19 +126,23 @@ export default function StudentDataTable(props) {
     let folder = await uploadFiles(e.target.files[0], origin, student);
     setUpload(upload + 1);
 
-    let leaf = await getMetadata(ref(storage, folder));
-    let instruction = createAppendInstruction(
-      localKeypair.publicKey,
-      merkleKeypair.publicKey,
-      leaf
-    );
-    const instructions = [instruction];
-
-    let transaction = await buildTransaction(instructions);
-    await connection
-      .simulateTransaction(transaction)
-      .then((res) => console.log("success :)", res.value));
-    await connection.sendTransaction(transaction);
+    let uploadedFileRef = ref(storage, `${folder}/${e.target.files[0].name}`)
+    setTimeout(async () => {
+      let fileMeta = await getMetadata(uploadedFileRef);
+      let leaf = Buffer.from(fileMeta.customMetadata.leaf, "ascii");
+      let instruction = createAppendInstruction(
+        localKeypair.publicKey,
+        merkleKeypair.publicKey,
+        leaf
+      );
+      const instructions = [instruction];
+  
+      let transaction = await buildTransaction(instructions);
+      await connection
+        .simulateTransaction(transaction)
+        .then((res) => console.log("success :)", res.value));
+      await connection.sendTransaction(transaction);
+    }, 2000);
   };
 
   //Custom footer to be rendered with data table

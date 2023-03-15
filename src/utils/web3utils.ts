@@ -29,7 +29,7 @@ export const connection = new web3.Connection(
 );
 
 export async function buildTree() {
-  let leaf_buffers = await getLeavesFromFirebase("files");
+  let leaf_buffers = await getLeavesFromFirebase("students");
   return MerkleTree.sparseMerkleTreeFromLeaves(leaf_buffers, 14);
 }
 

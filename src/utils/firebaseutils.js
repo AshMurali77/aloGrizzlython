@@ -81,7 +81,7 @@ export const uploadFiles = async (file, origin, student, index) => {
       index: index || file_data.length,
     },
   };
-  const uploadTask = uploadBytesResumable(storageRef, file, metadata);
+  const uploadTask = uploadBytesResumable(storageRef, file, metadata)
 
   uploadTask.then(() => {
     updateFileData(uploadTask.snapshot.metadata.fullPath);
