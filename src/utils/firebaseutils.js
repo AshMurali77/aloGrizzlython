@@ -74,11 +74,12 @@ export const uploadFiles = async (file, origin, student, index) => {
       ? "files"
       : "institution-two";
   const storageRef = ref(storage, `${folder}/${file.name}`);
-  const [file_data] = await getFileData(folder);
+  const [file_data, download_data, all_file_data, all_download_data] =
+    await getFileData(folder);
   const metadata = {
     customMetadata: {
       student_id: student.id,
-      index: index || file_data.length,
+      index: index || all_file_data.length,
     },
   };
   const uploadTask = uploadBytesResumable(storageRef, file, metadata)
@@ -193,6 +194,8 @@ export const deleteStudent = async (origin, id) => {
 
 //Fetch files from storage
 export const getFileData = async (origin) => {
+  let all_file_data = [];
+  let all_download_data = [];
   let file_data = [];
   let download_data = [];
   const storageRef = ref(storage, `${origin}/`);
@@ -217,10 +220,12 @@ export const getFileData = async (origin) => {
         file_data.push(metadata);
         download_data.push(download);
       }
+      all_file_data.push(metadata);
+      all_download_data.push(download);
     })
   );
   console.log("file data", file_data);
-  return [file_data, download_data];
+  return [file_data, download_data, all_file_data, all_download_data];
 };
 
 //Fetch a specific student's files form storage
