@@ -66,9 +66,10 @@ export default function StudentDataTable(props) {
       width: 160,
       sortable: false,
       renderCell: (params) => {
-        const onClick = (e) => {
+        const onClick = async (e) => {
           e.stopPropagation(); // don't select this row after clicking
-          deleteStudent(origin, params.row.id);
+          await deleteStudent(origin, params.row.id);
+          console.log("deletion done");
           setUpload(upload + 1);
         };
         return (

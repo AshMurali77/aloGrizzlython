@@ -64,7 +64,7 @@ export const createLeaf = async (storageRef) => {
 };
 
 //Upload file to storage
-export const uploadFiles = async (file, origin, student) => {
+export const uploadFiles = async (file, origin, student, index) => {
   console.log("student", student);
   if (!file) return;
   let folder =
@@ -78,7 +78,7 @@ export const uploadFiles = async (file, origin, student) => {
   const metadata = {
     customMetadata: {
       student_id: student.id,
-      index: file_data.length,
+      index: index || file_data.length,
     },
   };
   const uploadTask = uploadBytesResumable(storageRef, file, metadata);
@@ -155,6 +155,9 @@ export const deleteStudent = async (origin, id) => {
   const [file_data] = await getFileData(origin);
   file_data.map(async (file) => {
     if (id == file.customMetadata.student_id) {
+      const index = file.customMetadata.index;
+      const newFile = new File([""], `${index}.txt`, { type: "text/plain" });
+      await uploadFiles(newFile, origin, { id: "-1" }, index);
       storageRef = ref(storage, file.fullPath);
       await deleteObject(storageRef)
         .then(() => {
