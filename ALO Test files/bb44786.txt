@@ -1,0 +1,14 @@
+Institution
+UT Austin
+Classification
+Junior
+credits
+60
+First Name
+Bob
+ID
+bb44786
+Last Name
+Bobson
+Major
+Chemistry

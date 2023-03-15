@@ -1,0 +1,14 @@
+Institution
+Texas A&M
+Classification
+Freshman
+credits
+0
+First Name
+Johnny
+ID
+ja12304
+Last Name
+Appleseed
+Major
+Computer Science

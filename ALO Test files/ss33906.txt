@@ -1,0 +1,14 @@
+Institution
+UT Austin
+Classification
+Junior
+credits
+60
+First Name
+Sarah
+ID
+ss33906
+Last Name
+Saucepan
+Major
+Biology
