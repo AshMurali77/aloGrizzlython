@@ -156,7 +156,7 @@ export const deleteStudent = async (origin, id) => {
   file_data.map(async (file) => {
     if (id == file.customMetadata.student_id) {
       const index = file.customMetadata.index;
-      const newFile = new File([""], `${index}.txt`, { type: "text/plain" });
+      const newFile = new File([""], "dead.txt", { type: "text/plain" });
       await uploadFiles(newFile, origin, { id: "-1" }, index);
       storageRef = ref(storage, file.fullPath);
       await deleteObject(storageRef)
@@ -191,8 +191,10 @@ export const getFileData = async (origin) => {
         ),
       }; */
       //console.log(download);
-      file_data.push(metadata);
-      download_data.push(download);
+      if (metadata.name != "dead.txt") {
+        file_data.push(metadata);
+        download_data.push(download);
+      }
     })
   );
   console.log("file data", file_data);
