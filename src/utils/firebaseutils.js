@@ -65,6 +65,7 @@ export const createLeaf = async (storageRef) => {
 
 //Upload file to storage
 export const uploadFiles = async (file, origin, student, index) => {
+  let metadata = {};
   console.log("student", student);
   if (!file) return;
   let folder =
@@ -76,17 +77,29 @@ export const uploadFiles = async (file, origin, student, index) => {
   const storageRef = ref(storage, `${folder}/${file.name}`);
   const [file_data, download_data, all_file_data, all_download_data] =
     await getFileData(folder);
-  const metadata = {
-    customMetadata: {
-      student_id: student.id,
-      index: index || all_file_data.length,
-    },
-  };
-  const uploadTask = uploadBytesResumable(storageRef, file, metadata)
+  if (student.id != -1) {
+    metadata = {
+      customMetadata: {
+        student_id: student.id,
+        index: index || all_file_data.length,
+      },
+    };
+  } else {
+    metadata = {
+      customMetadata: {
+        student_id: student.id,
+        index: index || all_file_data.length,
+        leaf: String.fromCharCode.apply(String, Buffer.alloc(32, 0)),
+      },
+    };
+  }
 
-  uploadTask.then(() => {
-    updateFileData(uploadTask.snapshot.metadata.fullPath);
-  });
+  const uploadTask = uploadBytesResumable(storageRef, file, metadata);
+
+  student.id != -1 &&
+    uploadTask.then(() => {
+      updateFileData(uploadTask.snapshot.metadata.fullPath);
+    });
   return folder;
 };
 
@@ -178,7 +191,9 @@ export const deleteStudent = async (origin, id) => {
   file_data.map(async (file) => {
     if (id == file.customMetadata.student_id) {
       const index = file.customMetadata.index;
-      const newFile = new File([""], "dead.txt", { type: "text/plain" });
+      const newFile = new File([""], `dead${index}.txt`, {
+        type: "text/plain",
+      });
       await uploadFiles(newFile, origin, { id: "-1" }, index);
       storageRef = ref(storage, file.fullPath);
       await deleteObject(storageRef)
@@ -216,7 +231,7 @@ export const getFileData = async (origin) => {
         ),
       }; */
       //console.log(download);
-      if (metadata.name != "dead.txt") {
+      if (metadata.name.substring(0, 4) != "dead") {
         file_data.push(metadata);
         download_data.push(download);
       }
