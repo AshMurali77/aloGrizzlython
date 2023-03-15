@@ -19,8 +19,10 @@ import {
   appendToTree,
   buildTree,
   getLeavesFromFirebase,
+  buildTransaction,
 } from "../utils/web3utils";
 import createAppendInstruction from "../utils/append";
+import createReplaceInstruction from "../utils/replace";
 import * as web3 from "@solana/web3.js";
 
 export default function StudentDataTable(props) {
@@ -71,6 +73,32 @@ export default function StudentDataTable(props) {
           await deleteStudent(origin, params.row.id);
           console.log("deletion done");
           setUpload(upload + 1);
+
+          let merkle = await buildTree();
+          let proof = getProof(merkle, index);
+          let index = 0; //getMetadata(origin).customMetadata.index
+          let leafData = Buffer.alloc(32, 0)
+
+          let previousLeaf = merkle.leaves[index].node;
+
+          let replaceInstruction = createReplaceInstruction(
+            localKeypair.publicKey,
+            merkleKeypair.publicKey,
+            merkle.root,
+            index,
+            previousLeaf,
+            leafData,
+            proof
+          );
+          
+          const instructions = [replaceInstruction];
+
+          let transaction = await buildTransaction(instructions);
+
+          await connection.simulateTransaction(transaction).then((res) => console.log("success :)", res.value));
+          await connection.sendTransaction(transaction);
+
+
         };
         return (
           <Box sx={{ justifyContent: "space-between" }}>
@@ -106,13 +134,7 @@ export default function StudentDataTable(props) {
     );
     const instructions = [instruction];
 
-    const { blockhash, blockheight } = await connection.getLatestBlockhash();
-    const message = new web3.TransactionMessage({
-      payerKey: localKeypair.publicKey,
-      recentBlockhash: blockhash,
-      instructions,
-    }).compileToV0Message();
-    const transaction = new web3.VersionedTransaction(message);
+    let transaction = await buildTransaction(instructions);
     await connection
       .simulateTransaction(transaction)
       .then((res) => console.log("success :)", res.value));

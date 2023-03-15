@@ -28,6 +28,7 @@ import {
   localKeypair,
   connection,
   getProof,
+  buildTransaction,
   appendToTree,
   buildTree,
   getLeavesFromFirebase,
@@ -104,17 +105,7 @@ export default function Sidebar({ drawerWidth }) {
       rentSysvar
     );
     const instructions = [createAccountInstruction, instruction];
-    const {
-      context: { slot: minContextSlot },
-      value: { blockhash, lastValidBlockHeight },
-    } = await connection.getLatestBlockhashAndContext();
-    const message = new web3.TransactionMessage({
-      payerKey: localKeypair.publicKey,
-      recentBlockhash: blockhash,
-      instructions,
-    }).compileToV0Message();
-    const transaction = new web3.VersionedTransaction(message);
-    transaction.sign([localKeypair, merkleKeypair]);
+    let transaction = await buildTransaction(instructions);
     //const signature = await connection.sendTransaction(transaction);
     await connection.sendTransaction(transaction);
   };
@@ -132,30 +123,9 @@ export default function Sidebar({ drawerWidth }) {
         )
       );
     });
-    /* let instruction = createAppendInstruction(
-      localKeypair.publicKey,
-      merkleKeypair.publicKey,
-      keccak_256.digest(
-        Buffer.concat([
-          Buffer.from(localKeypair.publicKey.toBase58()),
-          Buffer.from(merkleKeypair.publicKey.toBase58()),
-          Buffer.from(programID.toBase58()),
-        ])
-      )
-    ); */
+    
     const instructions = appendArray;
-    const {
-      context: { slot: minContextSlot },
-      value: { blockhash, lastValidBlockHeight },
-    } = await connection.getLatestBlockhashAndContext();
-    const message = new web3.TransactionMessage({
-      payerKey: localKeypair.publicKey,
-      recentBlockhash: blockhash,
-      instructions,
-    }).compileToV0Message();
-    const transaction = new web3.VersionedTransaction(message);
-    transaction.sign([localKeypair, merkleKeypair]);
-    //const signature = await connection.sendTransaction(transaction);
+    let transaction = await buildTransaction(instructions);
     await connection
       .simulateTransaction(transaction)
       .then((res) => console.log("success :)", res.value));
@@ -186,9 +156,9 @@ export default function Sidebar({ drawerWidth }) {
  */
     let previousLeaf = merkle.leaves[index].node;
     //console.log(previousLeaf);
-    //let new_merkle = appendToTree(merkle, leafData);
+    //let new_merkle = appendToTree(merkle, leafData, index);
     let proof = getProof(merkle, index);
-    console.log(proof.proof);
+    console.log(proof);
     let replaceInstruction = createReplaceInstruction(
       localKeypair.publicKey,
       merkleKeypair.publicKey,
@@ -206,14 +176,7 @@ export default function Sidebar({ drawerWidth }) {
       context: { slot: minContextSlot },
       value: { blockhash, lastValidBlockHeight },
     } = await connection.getLatestBlockhashAndContext(); */
-    const { blockhash, blockheight } = await connection.getLatestBlockhash();
-    const message = new web3.TransactionMessage({
-      payerKey: localKeypair.publicKey,
-      recentBlockhash: blockhash,
-      instructions,
-    }).compileToV0Message();
-    const transaction = new web3.VersionedTransaction(message);
-    transaction.sign([localKeypair, merkleKeypair]);
+    let transaction = await buildTransaction(instructions);
     //const signature = await connection.sendTransaction(transaction);
     await connection
       .simulateTransaction(transaction)
