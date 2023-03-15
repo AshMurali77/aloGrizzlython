@@ -42,8 +42,8 @@ export function buildEmptyTree() {
   return MerkleTree.sparseMerkleTreeFromLeaves(leaves, 14);
 }
 
-export function appendToTree(merkle: MerkleTree, leaf_data: number[]) {
-  merkle.updateLeaf(1, Buffer.from(leaf_data));
+export function appendToTree(merkle: MerkleTree, leaf_data: number[], index : number) {
+  merkle.updateLeaf(index, Buffer.from(leaf_data));
   return merkle;
 }
 
@@ -51,6 +51,22 @@ export function getProof(merkle: MerkleTree, leafIndex: number) {
   //let merkle = await buildTree();
   console.log(merkle.getProof(leafIndex));
   return merkle.getProof(leafIndex);
+}
+
+export async function buildTransaction(instructions : web3.TransactionInstruction[]) {
+
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+
+  const message = new web3.TransactionMessage({
+    payerKey: localKeypair.publicKey,
+    recentBlockhash: blockhash,
+    instructions,
+  }).compileToV0Message();
+  const transaction = new web3.VersionedTransaction(message);
+  transaction.sign([localKeypair, merkleKeypair]);
+  //const signature = await connection.sendTransaction(transaction);
+  
+  return transaction;
 }
 
 /* 
