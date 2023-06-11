@@ -1,70 +1,54 @@
-# Getting Started with Create React App
+# ALO - Solana Student Record Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+ALO is a project developed during the Solana Grizzlython, a hackathon focused on building applications on the Solana blockchain. ALO is a student record dashboard that enables students and educational institutions to upload, transfer, and delete student records securely. The project combines the power of React, Rust, the Solana account compression program, the Solana web3js library, Firebase Storage, and Cloud Firestore to provide a seamless and decentralized educational record management solution.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Student Record Management**: ALO allows students and institutions to manage student records efficiently. Users can upload, transfer, and delete records seamlessly through the user-friendly dashboard.
 
-### `npm start`
+- **Solana Blockchain Integration**: ALO's backend is built using rust and the frontend leverages the Solana web3js library to interact with the Solana blockchain. This integration enables on-chain storage of educational records, providing immutability and transparency.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Firebase Storage**: ALO utilizes Firebase Storage to securely store the uploaded student record files. This ensures that the records are accessible and protected from unauthorized access.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Cloud Firestore**: The student data associated with each record is stored in Cloud Firestore, a flexible and scalable NoSQL database provided by Firebase. This allows for efficient retrieval and management of student information.
 
-### `npm test`
+- **Solana Account Compression Library**: ALO implements the Solana account compression library to synchronize changes made to the student record information in Firebase with the on-chain data. This integration ensures that the educational records remain consistent and up-to-date on the Solana blockchain.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Technologies Used
 
-### `npm run build`
+- React: ALO's frontend is built using React and Material UI, providing sleek styling and functionality to the project.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Solana web3js Library: ALO utilizes the Solana web3js library to interact with the Solana blockchain. This library provides an interface for sending transactions, querying on-chain data, and managing accounts on the Solana network.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Firebase Storage: ALO leverages Firebase Storage to store the uploaded student record files securely. Firebase Storage provides easy-to-use APIs for uploading and managing files in the cloud.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Cloud Firestore: ALO uses Cloud Firestore, a flexible and scalable NoSQL database, to store the student data associated with each record. Cloud Firestore allows for efficient querying and retrieval of student information.
 
-### `npm run eject`
+- Solana Account Compression Library: ALO implements the Solana account compression library to synchronize changes between the Firebase records and the on-chain data. This library optimizes the storage and transmission of the educational records by implementing concurrent merkle trees to sync on and off chain state. 
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Installation
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+To run the client-side of ALO locally (not including the Solana program), follow these steps:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Clone the repository: `git clone https://github.com/your/repo.git`.
+2. Navigate to the project directory: `cd ALO`.
+3. Install the dependencies: `npm install`.
+4. Set up your Firebase project and obtain the necessary credentials.
+5. Update the Firebase configuration in the code to match your project credentials.
+6. Build and run the project: `npm start`.
+7. Access the application at `http://localhost:3000` in your web browser.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
+## Usage
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Once the ALO application is running, you can access the student record dashboard in your web browser. The dashboard provides a user-friendly interface for managing student records.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Upload**: Click on the "Upload" button to add a new student record. Fill in the required details and attach the relevant file. The record will be securely stored in Firebase Storage, and the associated data will be saved in Cloud Firestore.
 
-### Code Splitting
+- **Transfer**: Transfer student records from one institution to another by selecting the desired records and specifying the recipient institution. ALO will update the on-chain information and sync the changes with Firebase.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- **Delete**: Remove student records from the dashboard by Clicking the Delete Button. 
 
-### Analyzing the Bundle Size
+## Contact
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+For any inquiries or feedback, please contact ashmurali77@gmail.com -- I'd love to chat!
